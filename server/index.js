@@ -2,7 +2,7 @@ import 'dotenv/config';
 
 import { ApolloServer } from '@apollo/server';
 import { startStandaloneServer } from '@apollo/server/standalone';
-import { userTypeDefs, userResolvers } from './schemas/userSchema';
+import { userTypeDefs, userResolvers } from './schemas/userSchema.js';
 
 const server = new ApolloServer({
   typeDefs: [userTypeDefs],
