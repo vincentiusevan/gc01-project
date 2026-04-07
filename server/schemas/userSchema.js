@@ -1,3 +1,5 @@
+import User from '../models/User.js';
+
 export const userTypeDefs = `#graphql
   type User {
     _id: ID
@@ -26,8 +28,8 @@ export const userResolvers = {
   Mutation: {
     register: async (_, args) => {
       const { name, username, email, password } = args.newUser;
-
-      return 'Register berhasil';
+      const message = await User.register({ name, username, email, password });
+      return message;
     },
   },
 };
