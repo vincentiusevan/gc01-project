@@ -21,6 +21,7 @@ export const userTypeDefs = `#graphql
 
   type Mutation {
     register(newUser: RegisterInput): String
+    login(username: String, password: String): String
   }
 `;
 
@@ -30,6 +31,12 @@ export const userResolvers = {
       const { name, username, email, password } = args.newUser;
       const message = await User.register({ name, username, email, password });
       return message;
+    },
+    login: async (_, args) => {
+      const { username, password } = args;
+      const token = await User.login(username, password);
+
+      return token;
     },
   },
 };

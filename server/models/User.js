@@ -1,7 +1,8 @@
 import { ObjectId } from 'mongodb';
 import { getDB } from '../config/mongodb.js';
-import { hashPassword } from '../helpers/bcrypt.js';
+import { hashPassword, comparePassword } from '../helpers/bcrypt.js';
 import emailValidator from 'email-validator';
+import { signToken } from '../helpers/jwt.js';
 
 export default class User {
   static getCollection() {
@@ -32,5 +33,19 @@ export default class User {
     await collection.insertOne(payload);
 
     return 'Register berhasil';
+  }
+
+  static async login(username, password) {
+    const collection = this.getCollection();
+
+    const user = await collection.findOne({ username });
+    if (!user) throw new Error('Invalid username/password');
+
+    const isValid = comparePassword(password, user.password);
+    if (!isValid) throw new Error('Invalid username/password');
+
+    const token = signToken({ _id: user._id, username: user.username });
+
+    return token;
   }
 }
