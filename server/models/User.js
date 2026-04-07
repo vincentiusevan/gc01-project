@@ -48,4 +48,12 @@ export default class User {
 
     return token;
   }
+
+  static async getUserById(id) {
+    const collection = this.getCollection();
+    const _id = new ObjectId(id);
+    const user = await collection.findOne({ _id });
+
+    return user;
+  }
 }
