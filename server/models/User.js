@@ -18,8 +18,10 @@ export default class User {
     if (!payload.name) throw new Error('Name is required');
     if (!payload.username) throw new Error('Username is required');
     if (!payload.email) throw new Error('Email is required');
+
     if (!payload.password) throw new Error('Password is required');
     if (payload.password.length < 5) throw new Error('Password minimum 5 characters');
+    if (/\s/.test(payload.password)) throw new Error('Password cannot contain spaces');
 
     if (!emailValidator.validate(payload.email)) throw new Error('Invalid email format');
 

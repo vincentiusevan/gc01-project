@@ -18,7 +18,6 @@ export const userTypeDefs = `#graphql
   }
 
   type Query {
-    _empty: String
     searchUser(query: String): [User]
     getUserById(id: ID!): User
   }

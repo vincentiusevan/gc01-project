@@ -9,10 +9,13 @@ import { followResolvers, followTypeDefs } from './schemas/followSchema.js';
 const server = new ApolloServer({
   typeDefs: [userTypeDefs, postTypeDefs, followTypeDefs],
   resolvers: [userResolvers, postResolvers, followResolvers],
+  introspection: true,
 });
 
+const PORT = process.env.PORT;
+
 const { url } = await startStandaloneServer(server, {
-  listen: { port: 3000 },
+  listen: { port: PORT },
   context: async ({ req, res }) => {
     return { authN: async () => authN(req) };
   },

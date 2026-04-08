@@ -62,11 +62,13 @@ type Mutation {
 
 export const postResolvers = {
   Query: {
-    getPosts: async () => {
+    getPosts: async (_, __, contextValue) => {
+      await contextValue.authN();
       const posts = await Post.getPosts();
       return posts;
     },
-    getPostById: async (_, args) => {
+    getPostById: async (_, args, contextValue) => {
+      await contextValue.authN();
       const { id } = args;
       const post = await Post.getPostById(id);
 

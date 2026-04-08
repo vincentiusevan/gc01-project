@@ -1,5 +1,6 @@
 import { ObjectId } from 'mongodb';
 import { getDB } from '../config/mongodb.js';
+import { redis } from '../config/redis.js';
 
 export default class Post {
   static getCollection() {
@@ -10,6 +11,9 @@ export default class Post {
   }
 
   static async getPosts() {
+    const cache = await redis.get('posts:all');
+    if (cache) return JSON.parse(cache);
+
     const collection = this.getCollection();
 
     const posts = await collection
@@ -41,6 +45,7 @@ export default class Post {
       ])
       .toArray();
 
+    await redis.set('posts:all', JSON.stringify(posts));
     return posts;
   }
 
@@ -92,6 +97,7 @@ export default class Post {
     };
 
     await collection.insertOne(newPost);
+    await redis.del('posts:all');
 
     return 'Post berhasil ditambahkan';
   }
