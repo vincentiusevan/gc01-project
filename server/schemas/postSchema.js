@@ -8,13 +8,30 @@ type Comment {
   updatedAt: String
 }
 
+type Like {
+  username: String
+  createdAt: String
+  updatedAt: String
+}
+
+
+type PostAuthor {
+  _id: ID
+  name: String
+  username: String
+  email: String
+}
+
+
   type Post {
     _id: ID
     content: String
     tags: [String]
     imgUrl: String
     authorId: ID
+    author: PostAuthor
     comments: [Comment]
+    likes: [Like]
     createdAt: String
     updatedAt: String
   }
@@ -37,6 +54,7 @@ input CommentInput {
 type Mutation {
     addPost(newPost: PostInput): String
     commentPost(postId: ID, comment: CommentInput): String
+    likePost(postId: ID): String
 }
 
 
@@ -71,6 +89,14 @@ export const postResolvers = {
 
       const { postId, comment } = args;
       const message = await Post.commentPost(postId, { ...comment, username: user.username });
+
+      return message;
+    },
+    likePost: async (_, args, contextValue) => {
+      const user = await contextValue.authN();
+
+      const { postId } = args;
+      const message = await Post.likePost(postId, user.username);
 
       return message;
     },

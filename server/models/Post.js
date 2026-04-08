@@ -12,7 +12,34 @@ export default class Post {
   static async getPosts() {
     const collection = this.getCollection();
 
-    const posts = await collection.find().sort({ createdAt: -1 }).toArray();
+    const posts = await collection
+      .aggregate([
+        {
+          $lookup: {
+            from: 'users',
+            localField: 'authorId',
+            foreignField: '_id',
+            as: 'author',
+          },
+        },
+        {
+          $unwind: {
+            path: '$author',
+            preserveNullAndEmptyArrays: true,
+          },
+        },
+        {
+          $project: {
+            'author.password': 0,
+          },
+        },
+        {
+          $sort: {
+            createdAt: -1,
+          },
+        },
+      ])
+      .toArray();
 
     return posts;
   }
@@ -20,7 +47,33 @@ export default class Post {
   static async getPostById(id) {
     const collection = this.getCollection();
     const _id = new ObjectId(id);
-    const post = await collection.findOne({ _id });
+
+    const [post] = await collection
+      .aggregate([
+        {
+          $match: { _id },
+        },
+        {
+          $lookup: {
+            from: 'users',
+            localField: 'authorId',
+            foreignField: '_id',
+            as: 'author',
+          },
+        },
+        {
+          $unwind: {
+            path: '$author',
+            preserveNullAndEmptyArrays: true,
+          },
+        },
+        {
+          $project: {
+            'author.password': 0,
+          },
+        },
+      ])
+      .toArray();
 
     return post;
   }
@@ -59,5 +112,26 @@ export default class Post {
     await collection.updateOne({ _id }, { $push: { comments: comment } });
 
     return 'Komentar berhasil ditambahkan';
+  }
+
+  static async likePost(postId, username) {
+    const collection = this.getCollection();
+    const _id = new ObjectId(postId);
+
+    const post = await collection.findOne({ _id });
+    if (!post) throw new Error('Post not found');
+
+    const alreadyLiked = post.likes.find((like) => like.username === username);
+    if (alreadyLiked) throw new Error('You already liked this post');
+
+    const like = {
+      username,
+      createdAt: new Date(),
+      updatedAt: new Date(),
+    };
+
+    await collection.updateOne({ _id }, { $push: { likes: like } });
+
+    return 'Post berhasil di-like';
   }
 }
