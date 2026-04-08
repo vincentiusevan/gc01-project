@@ -12,7 +12,7 @@ export default async function authN(req) {
 
   const payload = verifyToken(tokenValue);
 
-  const user = await User.getUserById(payload._id);
+  const user = await User.findByPk(payload._id);
   if (!user) throw new Error('unauthorized');
 
   const { password, ...rest } = user;

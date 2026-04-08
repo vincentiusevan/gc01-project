@@ -42,4 +42,22 @@ export default class Post {
 
     return 'Post berhasil ditambahkan';
   }
+
+  static async commentPost(postId, commentPayload) {
+    const collection = this.getCollection();
+    const _id = new ObjectId(postId);
+
+    if (!commentPayload.content) throw new Error('Comment content is required');
+
+    const comment = {
+      content: commentPayload.content,
+      username: commentPayload.username,
+      createdAt: new Date(),
+      updatedAt: new Date(),
+    };
+
+    await collection.updateOne({ _id }, { $push: { comments: comment } });
+
+    return 'Komentar berhasil ditambahkan';
+  }
 }

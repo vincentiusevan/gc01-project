@@ -4,10 +4,11 @@ import { startStandaloneServer } from '@apollo/server/standalone';
 import { userTypeDefs, userResolvers } from './schemas/userSchema.js';
 import { postTypeDefs, postResolvers } from './schemas/postSchema.js';
 import authN from './helpers/authN.js';
+import { followResolvers, followTypeDefs } from './schemas/followSchema.js';
 
 const server = new ApolloServer({
-  typeDefs: [userTypeDefs, postTypeDefs],
-  resolvers: [userResolvers, postResolvers],
+  typeDefs: [userTypeDefs, postTypeDefs, followTypeDefs],
+  resolvers: [userResolvers, postResolvers, followResolvers],
 });
 
 const { url } = await startStandaloneServer(server, {

@@ -1,15 +1,26 @@
 import User from '../models/User.js';
 
 export const userTypeDefs = `#graphql
-  type User {
+  type FollowDetail {
     _id: ID
     name: String
     username: String
     email: String
   }
 
+  type User {
+    _id: ID
+    name: String
+    username: String
+    email: String
+    followers: [FollowDetail]
+    followings: [FollowDetail]
+  }
+
   type Query {
     _empty: String
+    searchUser(query: String): [User]
+    getUserById(id: ID!): User
   }
 
   input RegisterInput {
@@ -37,6 +48,24 @@ export const userResolvers = {
       const token = await User.login(username, password);
 
       return token;
+    },
+  },
+  Query: {
+    searchUser: async (_, args, contextValue) => {
+      await contextValue.authN();
+
+      const { query } = args;
+      const users = await User.searchUser(query);
+
+      return users;
+    },
+    getUserById: async (_, args, contextValue) => {
+      await contextValue.authN();
+
+      const { id } = args;
+      const user = await User.getUserById(id);
+
+      return user;
     },
   },
 };

@@ -52,8 +52,78 @@ export default class User {
   static async getUserById(id) {
     const collection = this.getCollection();
     const _id = new ObjectId(id);
+    const [user] = await collection
+      .aggregate([
+        {
+          $match: { _id },
+        },
+        {
+          $lookup: {
+            from: 'follows',
+            localField: '_id',
+            foreignField: 'followerId',
+            as: 'followingConnections',
+          },
+        },
+        {
+          $lookup: {
+            from: 'users',
+            localField: 'followingConnections.followingId',
+            foreignField: '_id',
+            as: 'followings',
+          },
+        },
+        {
+          $lookup: {
+            from: 'follows',
+            localField: '_id',
+            foreignField: 'followingId',
+            as: 'followerConnections',
+          },
+        },
+        {
+          $lookup: {
+            from: 'users',
+            localField: 'followerConnections.followerId',
+            foreignField: '_id',
+            as: 'followers',
+          },
+        },
+        {
+          $project: {
+            password: 0,
+            followingConnections: 0,
+            followerConnections: 0,
+            'followers.password': 0,
+            'followings.password': 0,
+          },
+        },
+      ])
+      .toArray();
+
+    return user;
+  }
+
+  static async findByPk(id) {
+    const collection = this.getCollection();
+    const _id = new ObjectId(id);
     const user = await collection.findOne({ _id });
 
     return user;
+  }
+
+  static async searchUser(query) {
+    const collection = this.getCollection();
+
+    const users = await collection
+      .find({
+        $or: [
+          { name: { $regex: query, $options: 'i' } },
+          { username: { $regex: query, $options: 'i' } },
+        ],
+      })
+      .toArray();
+
+    return users;
   }
 }
