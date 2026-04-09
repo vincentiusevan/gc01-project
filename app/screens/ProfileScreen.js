@@ -1,12 +1,21 @@
+import { useContext } from 'react';
 import { View, StyleSheet } from 'react-native';
+import * as SecureStore from 'expo-secure-store';
 import { ScreenWrapper } from '../components/ScreenWrapper';
 import { AppText } from '../components/AppText';
 import { AppButton } from '../components/AppButton';
 import { colors } from '../theme/colors';
+import AuthContext from '../contexts/AuthContext';
 
-export function ProfileScreen({ navigation }) {
+export function ProfileScreen() {
+  const authContext = useContext(AuthContext);
   const followers = ['dudut123', 'mentor_gc1', 'sarah'];
   const followings = ['vincsevan', 'reactnative'];
+
+  const handleLogout = async () => {
+    await SecureStore.deleteItemAsync('access_token');
+    authContext.setIsSignIn(false);
+  };
 
   return (
     <ScreenWrapper>
@@ -45,11 +54,7 @@ export function ProfileScreen({ navigation }) {
           <AppText variant="muted">{followings.join(', ')}</AppText>
         </View>
 
-        <AppButton
-          title="Back to Login"
-          type="secondary"
-          onPress={() => navigation.navigate('LoginScreen')}
-        />
+        <AppButton title="Logout" type="secondary" onPress={handleLogout} />
       </View>
     </ScreenWrapper>
   );

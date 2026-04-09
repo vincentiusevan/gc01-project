@@ -1,9 +1,18 @@
 import { useState } from 'react';
 import { View, StyleSheet, Alert } from 'react-native';
+import { gql } from '@apollo/client';
+import { useMutation } from '@apollo/client/react';
+
 import { ScreenWrapper } from '../components/ScreenWrapper';
 import { AppText } from '../components/AppText';
 import { AppInput } from '../components/AppInput';
 import { AppButton } from '../components/AppButton';
+
+const REGISTER = gql`
+  mutation Register($newUser: RegisterInput) {
+    register(newUser: $newUser)
+  }
+`;
 
 export function RegisterScreen({ navigation }) {
   const [name, setName] = useState('');
@@ -11,14 +20,27 @@ export function RegisterScreen({ navigation }) {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
 
+  const [register, { loading }] = useMutation(REGISTER, {
+    onCompleted: (result) => {
+      Alert.alert('Success', result?.register || 'Register success');
+      navigation.goBack();
+    },
+    onError: (error) => {
+      Alert.alert('Register Error', error.message);
+    },
+  });
+
   const handleRegister = () => {
     if (!name || !username || !email || !password) {
-      Alert.alert('Error', 'Please fill all fields');
+      Alert.alert('Validation', 'Please fill all fields');
       return;
     }
 
-    Alert.alert('Success', 'Register UI complete for Day 3');
-    navigation.goBack();
+    register({
+      variables: {
+        newUser: { name, username, email, password },
+      },
+    });
   };
 
   return (
@@ -47,7 +69,7 @@ export function RegisterScreen({ navigation }) {
           onChangeText={setPassword}
         />
 
-        <AppButton title="Register" onPress={handleRegister} />
+        <AppButton title={loading ? 'Loading...' : 'Register'} onPress={handleRegister} />
         <AppButton title="Back to Login" type="secondary" onPress={() => navigation.goBack()} />
       </View>
     </ScreenWrapper>
