@@ -13,16 +13,18 @@ export default function App() {
 
   return (
     <NavigationContainer>
-      <Stack.Navigator>
+      <Stack.Navigator screenOptions={{ headerShown: false }}>
         {!accessToken ? (
           <>
             <Stack.Screen name="LoginScreen">
               {(props) => <LoginScreen {...props} setAccessToken={setAccessToken} />}
             </Stack.Screen>
-            <Stack.Screen name="RegisterScreen" component={RegisterScreen} />
+            <Stack.Screen name="RegisterScreen">
+              {(props) => <RegisterScreen {...props} />}
+            </Stack.Screen>
           </>
         ) : (
-          <Stack.Screen name="HomeNavigator" options={{ headerShown: false }}>
+          <Stack.Screen name="HomeNavigator">
             {(props) => <HomeNavigator {...props} setAccessToken={setAccessToken} />}
           </Stack.Screen>
         )}
