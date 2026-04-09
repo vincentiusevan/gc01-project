@@ -1,5 +1,9 @@
 import { useState } from 'react';
-import { View, Text, StyleSheet, TextInput, Button, Alert } from 'react-native';
+import { View, StyleSheet, Alert } from 'react-native';
+import { ScreenWrapper } from '../components/ScreenWrapper';
+import { AppText } from '../components/AppText';
+import { AppInput } from '../components/AppInput';
+import { AppButton } from '../components/AppButton';
 
 export function CreatePostScreen() {
   const [content, setContent] = useState('');
@@ -7,35 +11,63 @@ export function CreatePostScreen() {
   const [imgUrl, setImgUrl] = useState('');
 
   const handleSubmit = () => {
-    if (!content) {
+    if (!content.trim()) {
       Alert.alert('Error', 'Content is required');
       return;
     }
-    Alert.alert('Success', 'Create Post UI complete for Day 3');
+
+    Alert.alert('Success', 'Create post UI complete for Day 3');
     setContent('');
     setTags('');
     setImgUrl('');
   };
 
   return (
-    <View style={styles.container}>
-      <Text style={styles.title}>CreatePostScreen</Text>
-      <TextInput
-        style={styles.input}
-        placeholder="Content"
-        value={content}
-        onChangeText={setContent}
-        multiline
-      />
-      <TextInput style={styles.input} placeholder="Tags (comma separated)" value={tags} onChangeText={setTags} />
-      <TextInput style={styles.input} placeholder="Image URL" value={imgUrl} onChangeText={setImgUrl} />
-      <Button title="Add Post" onPress={handleSubmit} />
-    </View>
+    <ScreenWrapper>
+      <View style={styles.container}>
+        <AppText variant="heading" style={styles.title}>
+          Create Post
+        </AppText>
+        <AppText variant="muted" style={styles.subtitle}>
+          Share your thoughts on EX
+        </AppText>
+
+        <AppInput
+          placeholder="What's happening?"
+          value={content}
+          onChangeText={setContent}
+          multiline
+          style={styles.textArea}
+        />
+        <AppInput placeholder="Tags (comma separated)" value={tags} onChangeText={setTags} />
+        <AppInput
+          placeholder="Image URL"
+          value={imgUrl}
+          onChangeText={setImgUrl}
+          autoCapitalize="none"
+        />
+
+        <AppButton title="Post" onPress={handleSubmit} />
+      </View>
+    </ScreenWrapper>
   );
 }
 
 const styles = StyleSheet.create({
-  container: { flex: 1, padding: 16, gap: 10 },
-  title: { fontSize: 20, fontWeight: 'bold' },
-  input: { borderWidth: 1, borderColor: '#ccc', borderRadius: 8, padding: 10 },
+  container: {
+    flex: 1,
+    gap: 12,
+    paddingTop: 8,
+  },
+  title: {
+    marginTop: 8,
+  },
+  subtitle: {
+    marginBottom: 8,
+  },
+  textArea: {
+    minHeight: 120,
+    textAlignVertical: 'top',
+    paddingTop: 12,
+  },
 });

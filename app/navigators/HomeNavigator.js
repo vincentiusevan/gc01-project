@@ -6,17 +6,36 @@ import { PostDetailScreen } from '../screens/PostDetailScreen';
 import { SearchScreen } from '../screens/SearchScreen';
 import { ProfileScreen } from '../screens/ProfileScreen';
 import { UserDetailScreen } from '../screens/UserDetailScreen';
+import { colors } from '../theme/colors';
 
 const Tab = createBottomTabNavigator();
 const Stack = createNativeStackNavigator();
 
 function MainTabs() {
   return (
-    <Tab.Navigator screenOptions={{ headerShown: false }}>
-      <Tab.Screen name="HomeScreen" component={HomeScreen} />
-      <Tab.Screen name="CreatePostScreen" component={CreatePostScreen} />
-      <Tab.Screen name="SearchScreen" component={SearchScreen} />
-      <Tab.Screen name="ProfileScreen" component={ProfileScreen} />
+    <Tab.Navigator
+      screenOptions={{
+        headerShown: false,
+        tabBarStyle: {
+          backgroundColor: colors.bgSoft,
+          borderTopColor: colors.border,
+          height: 62,
+          paddingTop: 6,
+          paddingBottom: 6,
+        },
+        tabBarActiveTintColor: colors.text,
+        tabBarInactiveTintColor: colors.textMuted,
+        tabBarLabelStyle: { fontSize: 12, fontWeight: '600' },
+      }}
+    >
+      <Tab.Screen name="HomeScreen" component={HomeScreen} options={{ title: 'Home' }} />
+      <Tab.Screen
+        name="CreatePostScreen"
+        component={CreatePostScreen}
+        options={{ title: 'Create' }}
+      />
+      <Tab.Screen name="SearchScreen" component={SearchScreen} options={{ title: 'Search' }} />
+      <Tab.Screen name="ProfileScreen" component={ProfileScreen} options={{ title: 'Profile' }} />
     </Tab.Navigator>
   );
 }
