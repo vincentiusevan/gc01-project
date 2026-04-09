@@ -1,6 +1,6 @@
 import { View, Text, StyleSheet, Button } from 'react-native';
 
-export function ProfileScreen({ setAccessToken }) {
+export function ProfileScreen({ navigation }) {
   const followers = ['dudut123', 'mentor_gc1', 'sarah'];
   const followings = ['vincsevan', 'reactnative'];
 
@@ -13,7 +13,7 @@ export function ProfileScreen({ setAccessToken }) {
       <Text>{followers.join(', ')}</Text>
       <Text style={styles.subtitle}>Followings ({followings.length})</Text>
       <Text>{followings.join(', ')}</Text>
-      <Button title="Logout" onPress={() => setAccessToken('')} />
+      <Button title="Back to Login" onPress={() => navigation.navigate('LoginScreen')} />
     </View>
   );
 }

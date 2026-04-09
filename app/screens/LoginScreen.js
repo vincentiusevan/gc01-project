@@ -5,13 +5,13 @@ import { AppText } from '../components/AppText';
 import { AppInput } from '../components/AppInput';
 import { AppButton } from '../components/AppButton';
 
-export function LoginScreen({ navigation, setAccessToken }) {
+export function LoginScreen({ navigation }) {
   const [username, setUsername] = useState('');
   const [password, setPassword] = useState('');
 
   const handleLogin = () => {
     if (!username || !password) return;
-    setAccessToken('dummy-token-day3');
+    navigation.replace('HomeNavigator');
   };
 
   return (

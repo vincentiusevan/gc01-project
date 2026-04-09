@@ -1,5 +1,9 @@
 import { useState } from 'react';
-import { View, Text, StyleSheet, TextInput, Button, Alert } from 'react-native';
+import { View, StyleSheet, Alert } from 'react-native';
+import { ScreenWrapper } from '../components/ScreenWrapper';
+import { AppText } from '../components/AppText';
+import { AppInput } from '../components/AppInput';
+import { AppButton } from '../components/AppButton';
 
 export function RegisterScreen({ navigation }) {
   const [name, setName] = useState('');
@@ -18,40 +22,51 @@ export function RegisterScreen({ navigation }) {
   };
 
   return (
-    <View style={styles.container}>
-      <Text style={styles.title}>Register</Text>
+    <ScreenWrapper>
+      <View style={styles.container}>
+        <AppText variant="title" style={styles.brand}>
+          EX
+        </AppText>
+        <AppText variant="heading" style={styles.heading}>
+          Create your account
+        </AppText>
 
-      <TextInput style={styles.input} placeholder="Name" value={name} onChangeText={setName} />
-      <TextInput
-        style={styles.input}
-        placeholder="Username"
-        value={username}
-        onChangeText={setUsername}
-      />
-      <TextInput
-        style={styles.input}
-        placeholder="Email"
-        autoCapitalize="none"
-        keyboardType="email-address"
-        value={email}
-        onChangeText={setEmail}
-      />
-      <TextInput
-        style={styles.input}
-        placeholder="Password"
-        secureTextEntry
-        value={password}
-        onChangeText={setPassword}
-      />
+        <AppInput placeholder="Name" value={name} onChangeText={setName} />
+        <AppInput placeholder="Username" value={username} onChangeText={setUsername} />
+        <AppInput
+          placeholder="Email"
+          autoCapitalize="none"
+          keyboardType="email-address"
+          value={email}
+          onChangeText={setEmail}
+        />
+        <AppInput
+          placeholder="Password"
+          secureTextEntry
+          value={password}
+          onChangeText={setPassword}
+        />
 
-      <Button title="Register" onPress={handleRegister} />
-      <Button title="Back to Login" onPress={() => navigation.goBack()} />
-    </View>
+        <AppButton title="Register" onPress={handleRegister} />
+        <AppButton title="Back to Login" type="secondary" onPress={() => navigation.goBack()} />
+      </View>
+    </ScreenWrapper>
   );
 }
 
 const styles = StyleSheet.create({
-  container: { flex: 1, justifyContent: 'center', padding: 16, gap: 10 },
-  title: { fontSize: 22, fontWeight: 'bold', textAlign: 'center', marginBottom: 8 },
-  input: { borderWidth: 1, borderColor: '#ccc', borderRadius: 8, padding: 10 },
+  container: {
+    flex: 1,
+    justifyContent: 'center',
+    gap: 12,
+  },
+  brand: {
+    fontSize: 42,
+    textAlign: 'center',
+    marginBottom: 2,
+  },
+  heading: {
+    textAlign: 'center',
+    marginBottom: 14,
+  },
 });
