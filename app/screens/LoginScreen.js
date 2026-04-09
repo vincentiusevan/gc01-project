@@ -1,5 +1,9 @@
 import { useState } from 'react';
-import { View, Text, StyleSheet, TextInput, Button } from 'react-native';
+import { View, StyleSheet } from 'react-native';
+import { ScreenWrapper } from '../components/ScreenWrapper';
+import { AppText } from '../components/AppText';
+import { AppInput } from '../components/AppInput';
+import { AppButton } from '../components/AppButton';
 
 export function LoginScreen({ navigation, setAccessToken }) {
   const [username, setUsername] = useState('');
@@ -11,32 +15,52 @@ export function LoginScreen({ navigation, setAccessToken }) {
   };
 
   return (
-    <View style={styles.container}>
-      <Text style={styles.title}>Login</Text>
+    <ScreenWrapper>
+      <View style={styles.container}>
+        <AppText variant="title" style={styles.brand}>
+          EX
+        </AppText>
+        <AppText variant="heading" style={styles.heading}>
+          Sign in to EX
+        </AppText>
 
-      <TextInput
-        style={styles.input}
-        placeholder="Username"
-        autoCapitalize="none"
-        value={username}
-        onChangeText={setUsername}
-      />
-      <TextInput
-        style={styles.input}
-        placeholder="Password"
-        secureTextEntry
-        value={password}
-        onChangeText={setPassword}
-      />
+        <AppInput
+          placeholder="Username"
+          autoCapitalize="none"
+          value={username}
+          onChangeText={setUsername}
+        />
+        <AppInput
+          placeholder="Password"
+          secureTextEntry
+          value={password}
+          onChangeText={setPassword}
+        />
 
-      <Button title="Login" onPress={handleLogin} />
-      <Button title="Go to Register" onPress={() => navigation.navigate('RegisterScreen')} />
-    </View>
+        <AppButton title="Login" onPress={handleLogin} />
+        <AppButton
+          title="Go to Register"
+          type="secondary"
+          onPress={() => navigation.navigate('RegisterScreen')}
+        />
+      </View>
+    </ScreenWrapper>
   );
 }
 
 const styles = StyleSheet.create({
-  container: { flex: 1, justifyContent: 'center', padding: 16, gap: 10 },
-  title: { fontSize: 22, fontWeight: 'bold', textAlign: 'center', marginBottom: 8 },
-  input: { borderWidth: 1, borderColor: '#ccc', borderRadius: 8, padding: 10 },
+  container: {
+    flex: 1,
+    justifyContent: 'center',
+    gap: 12,
+  },
+  brand: {
+    fontSize: 42,
+    textAlign: 'center',
+    marginBottom: 2,
+  },
+  heading: {
+    textAlign: 'center',
+    marginBottom: 14,
+  },
 });
