@@ -1,17 +1,50 @@
-import { useState } from 'react';
-import { View, StyleSheet } from 'react-native';
+import { useContext, useState } from 'react';
+import { View, StyleSheet, Alert } from 'react-native';
+import { gql } from '@apollo/client';
+import { useMutation } from '@apollo/client/react';
+import * as SecureStore from 'expo-secure-store';
+
+import AuthContext from '../contexts/AuthContext';
 import { ScreenWrapper } from '../components/ScreenWrapper';
 import { AppText } from '../components/AppText';
 import { AppInput } from '../components/AppInput';
 import { AppButton } from '../components/AppButton';
 
+const LOGIN = gql`
+  mutation Login($username: String, $password: String) {
+    login(username: $username, password: $password)
+  }
+`;
+
 export function LoginScreen({ navigation }) {
+  const authContext = useContext(AuthContext);
+
   const [username, setUsername] = useState('');
   const [password, setPassword] = useState('');
 
+  const [login, { loading }] = useMutation(LOGIN, {
+    onCompleted: async (result) => {
+      const token = result?.login;
+      await SecureStore.setItemAsync('access_token', token);
+      authContext.setIsSignIn(true);
+    },
+    onError: (error) => {
+      Alert.alert('Login Error', error.message);
+    },
+  });
+
   const handleLogin = () => {
-    if (!username || !password) return;
-    navigation.replace('HomeNavigator');
+    if (!username || !password) {
+      Alert.alert('Validation', 'Username and password are required');
+      return;
+    }
+
+    login({
+      variables: {
+        username,
+        password,
+      },
+    });
   };
 
   return (
@@ -37,7 +70,7 @@ export function LoginScreen({ navigation }) {
           onChangeText={setPassword}
         />
 
-        <AppButton title="Login" onPress={handleLogin} />
+        <AppButton title={loading ? 'Loading...' : 'Login'} onPress={handleLogin} />
         <AppButton
           title="Go to Register"
           type="secondary"
