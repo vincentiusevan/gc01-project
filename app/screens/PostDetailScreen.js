@@ -1,5 +1,6 @@
 import { useState } from 'react';
-import { View, StyleSheet, Alert } from 'react-native';
+import { View, StyleSheet, Alert, Image, ScrollView } from 'react-native';
+import { Ionicons } from '@expo/vector-icons';
 import { gql } from '@apollo/client';
 import { useMutation, useQuery } from '@apollo/client/react';
 
@@ -124,8 +125,11 @@ export function PostDetailScreen({ route }) {
 
   return (
     <ScreenWrapper>
-      <View style={styles.container}>
-        <AppText variant="heading">Post Detail</AppText>
+      <ScrollView style={styles.container} contentContainerStyle={styles.containerContent}>
+        <AppText variant="heading">Post</AppText>
+        <AppText variant="muted" style={styles.subtitle}>
+          Conversation
+        </AppText>
 
         <View style={styles.card}>
           <AppText variant="body" style={styles.author}>
@@ -136,9 +140,24 @@ export function PostDetailScreen({ route }) {
             {post?.content || '-'}
           </AppText>
 
-          <View style={styles.metaRow}>
-            <AppText variant="muted">Likes {post?.likes?.length || 0}</AppText>
-            <AppText variant="muted">Comments {post?.comments?.length || 0}</AppText>
+          {post?.imgUrl ? <Image source={{ uri: post.imgUrl }} style={styles.postImage} /> : null}
+
+          <View style={styles.actionRow}>
+            <View style={styles.actionItem}>
+              <Ionicons name="chatbubble-outline" size={16} color={colors.textMuted} />
+              <AppText variant="muted" style={styles.actionText}>
+                {post?.comments?.length || 0}
+              </AppText>
+            </View>
+            <View style={styles.actionItem}>
+              <Ionicons name="heart-outline" size={16} color={colors.textMuted} />
+              <AppText variant="muted" style={styles.actionText}>
+                {post?.likes?.length || 0}
+              </AppText>
+            </View>
+            <View style={styles.actionItem}>
+              <Ionicons name="share-social-outline" size={16} color={colors.textMuted} />
+            </View>
           </View>
         </View>
 
@@ -172,7 +191,7 @@ export function PostDetailScreen({ route }) {
             </View>
           ))}
         </View>
-      </View>
+      </ScrollView>
     </ScreenWrapper>
   );
 }
@@ -180,8 +199,16 @@ export function PostDetailScreen({ route }) {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    gap: 12,
+  },
+  containerContent: {
+    flex: 1,
+    gap: 10,
     paddingTop: 8,
+    paddingBottom: 20,
+  },
+  subtitle: {
+    marginTop: -2,
+    marginBottom: 2,
   },
   centered: {
     flex: 1,
@@ -194,11 +221,11 @@ const styles = StyleSheet.create({
     fontWeight: '700',
   },
   card: {
-    backgroundColor: colors.card,
+    backgroundColor: colors.cardElevated,
     borderWidth: 1,
     borderColor: colors.border,
-    borderRadius: 16,
-    padding: 14,
+    borderRadius: 18,
+    padding: 16,
   },
   author: {
     color: colors.primary,
@@ -209,9 +236,26 @@ const styles = StyleSheet.create({
     lineHeight: 22,
     marginBottom: 12,
   },
-  metaRow: {
+  postImage: {
+    width: '100%',
+    height: 190,
+    borderRadius: 14,
+    marginBottom: 12,
+    backgroundColor: colors.bgSoft,
+  },
+  actionRow: {
     flexDirection: 'row',
-    gap: 14,
+    alignItems: 'center',
+    justifyContent: 'space-between',
+    paddingRight: 10,
+  },
+  actionItem: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 6,
+  },
+  actionText: {
+    fontSize: 13,
   },
   commentInput: {
     minHeight: 90,
@@ -220,11 +264,11 @@ const styles = StyleSheet.create({
     color: colors.text,
   },
   commentList: {
-    marginTop: 6,
+    marginTop: 8,
     backgroundColor: colors.card,
     borderWidth: 1,
     borderColor: colors.border,
-    borderRadius: 12,
+    borderRadius: 18,
     padding: 12,
     gap: 8,
   },

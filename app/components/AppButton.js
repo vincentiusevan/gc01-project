@@ -22,14 +22,16 @@ export function AppButton({ title, onPress, type = 'primary', style }) {
 
 const styles = StyleSheet.create({
   base: {
-    borderRadius: 999,
-    paddingVertical: 12,
-    paddingHorizontal: 16,
+    borderRadius: 9999,
+    paddingVertical: 13,
+    paddingHorizontal: 18,
     alignItems: 'center',
+    justifyContent: 'center',
+    minHeight: 48,
   },
-  primary: { backgroundColor: colors.primary },
+  primary: { backgroundColor: colors.primary, borderWidth: 1, borderColor: colors.primary },
   primaryPressed: { backgroundColor: colors.primaryPressed },
   secondary: { backgroundColor: 'transparent', borderWidth: 1, borderColor: colors.border },
-  secondaryPressed: { backgroundColor: '#121417' },
+  secondaryPressed: { backgroundColor: colors.cardElevated },
   secondaryText: { color: colors.text },
 });

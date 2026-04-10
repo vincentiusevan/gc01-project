@@ -9,6 +9,7 @@ import { ScreenWrapper } from '../components/ScreenWrapper';
 import { AppText } from '../components/AppText';
 import { AppInput } from '../components/AppInput';
 import { AppButton } from '../components/AppButton';
+import { colors } from '../theme/colors';
 
 const LOGIN = gql`
   mutation Login($username: String, $password: String) {
@@ -58,29 +59,39 @@ export function LoginScreen({ navigation }) {
         <AppText variant="title" style={styles.brand}>
           EX
         </AppText>
-        <AppText variant="heading" style={styles.heading}>
-          Sign in to EX
+        <AppText variant="muted" style={styles.subheading}>
+          See what&apos;s happening in the world right now.
         </AppText>
 
-        <AppInput
-          placeholder="Username"
-          autoCapitalize="none"
-          value={username}
-          onChangeText={setUsername}
-        />
-        <AppInput
-          placeholder="Password"
-          secureTextEntry
-          value={password}
-          onChangeText={setPassword}
-        />
+        <View style={styles.authCard}>
+          <AppText variant="heading" style={styles.heading}>
+            Sign in to EX
+          </AppText>
 
-        <AppButton title={loading ? 'Loading...' : 'Login'} onPress={handleLogin} />
-        <AppButton
-          title="Go to Register"
-          type="secondary"
-          onPress={() => navigation.navigate('RegisterScreen')}
-        />
+          <AppInput
+            placeholder="Username"
+            autoCapitalize="none"
+            value={username}
+            onChangeText={setUsername}
+          />
+          <AppInput
+            placeholder="Password"
+            secureTextEntry
+            value={password}
+            onChangeText={setPassword}
+          />
+
+          <AppButton title={loading ? 'Loading...' : 'Login'} onPress={handleLogin} />
+          <AppButton
+            title="Go to Register"
+            type="secondary"
+            onPress={() => navigation.navigate('RegisterScreen')}
+          />
+        </View>
+
+        <AppText variant="muted" style={styles.footNote}>
+          By signing in, you agree with our terms and privacy policy.
+        </AppText>
       </View>
     </ScreenWrapper>
   );
@@ -90,15 +101,34 @@ const styles = StyleSheet.create({
   container: {
     flex: 1,
     justifyContent: 'center',
-    gap: 12,
+    gap: 10,
   },
   brand: {
     fontSize: 42,
     textAlign: 'center',
-    marginBottom: 2,
+    marginBottom: 4,
   },
-  heading: {
+  subheading: {
     textAlign: 'center',
     marginBottom: 14,
+    fontSize: 15,
+  },
+  authCard: {
+    backgroundColor: colors.card,
+    borderWidth: 1,
+    borderColor: colors.border,
+    borderRadius: 24,
+    padding: 18,
+    gap: 13,
+  },
+  heading: {
+    textAlign: 'left',
+    marginBottom: 8,
+    fontSize: 28,
+  },
+  footNote: {
+    textAlign: 'center',
+    marginTop: 12,
+    fontSize: 13,
   },
 });

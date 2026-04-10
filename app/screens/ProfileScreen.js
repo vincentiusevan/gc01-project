@@ -1,5 +1,5 @@
 import { useContext, useEffect, useMemo, useState } from 'react';
-import { View, StyleSheet } from 'react-native';
+import { View, StyleSheet, ScrollView } from 'react-native';
 import { gql } from '@apollo/client';
 import { useLazyQuery, useQuery } from '@apollo/client/react';
 import * as SecureStore from 'expo-secure-store';
@@ -121,7 +121,9 @@ export function ProfileScreen() {
 
   return (
     <ScreenWrapper>
-      <View style={styles.container}>
+      <ScrollView style={styles.container} contentContainerStyle={styles.containerContent}>
+        <AppText variant="heading">Profile</AppText>
+
         <View style={styles.profileCard}>
           <View style={styles.avatar}>
             <AppText variant="heading">{user?.name?.[0] || 'E'}</AppText>
@@ -161,7 +163,7 @@ export function ProfileScreen() {
         </View>
 
         <AppButton title="Logout" type="secondary" onPress={handleLogout} />
-      </View>
+      </ScrollView>
     </ScreenWrapper>
   );
 }
@@ -169,21 +171,25 @@ export function ProfileScreen() {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
+  },
+  containerContent: {
+    flex: 1,
     gap: 12,
     paddingTop: 8,
+    paddingBottom: 18,
   },
   profileCard: {
-    backgroundColor: colors.card,
+    backgroundColor: colors.cardElevated,
     borderWidth: 1,
     borderColor: colors.border,
-    borderRadius: 16,
+    borderRadius: 18,
     padding: 16,
     alignItems: 'center',
     gap: 6,
   },
   avatar: {
-    width: 64,
-    height: 64,
+    width: 72,
+    height: 72,
     borderRadius: 999,
     backgroundColor: '#1d9bf033',
     alignItems: 'center',
@@ -202,7 +208,7 @@ const styles = StyleSheet.create({
     backgroundColor: colors.card,
     borderWidth: 1,
     borderColor: colors.border,
-    borderRadius: 16,
+    borderRadius: 18,
     padding: 14,
     gap: 6,
   },

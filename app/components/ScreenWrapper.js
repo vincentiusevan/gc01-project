@@ -17,5 +17,5 @@ const styles = StyleSheet.create({
   gradient: { flex: 1 },
   safe: { flex: 1, backgroundColor: 'transparent' },
   inner: { flex: 1 },
-  padded: { paddingHorizontal: 16, paddingTop: 8, paddingBottom: 12 },
+  padded: { paddingHorizontal: 16, paddingTop: 10, paddingBottom: 12 },
 });

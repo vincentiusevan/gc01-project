@@ -97,6 +97,10 @@ export function UserDetailScreen({ route, navigation }) {
   return (
     <ScreenWrapper>
       <View style={styles.container}>
+        <AppText variant="heading" style={styles.pageTitle}>
+          User Profile
+        </AppText>
+
         <View style={styles.card}>
           <View style={styles.avatar}>
             <AppText variant="heading">{name[0]}</AppText>
@@ -106,6 +110,15 @@ export function UserDetailScreen({ route, navigation }) {
           <AppText variant="muted">@{username}</AppText>
           <AppText variant="muted">{followers.length} followers</AppText>
           <AppText variant="muted">{followings.length} following</AppText>
+        </View>
+
+        <View style={styles.listCard}>
+          <AppText variant="body" style={styles.sectionTitle}>
+            Followers
+          </AppText>
+          <AppText variant="muted">
+            {followers.length ? followers.map((f) => `@${f.username}`).join(', ') : '-'}
+          </AppText>
         </View>
 
         <AppButton title={followLoading ? 'Following...' : 'Follow'} onPress={handleFollow} />
@@ -121,22 +134,37 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
     gap: 12,
   },
+  pageTitle: {
+    textAlign: 'center',
+    marginBottom: 2,
+  },
   card: {
-    backgroundColor: colors.card,
+    backgroundColor: colors.cardElevated,
     borderWidth: 1,
     borderColor: colors.border,
-    borderRadius: 16,
+    borderRadius: 18,
     padding: 16,
     alignItems: 'center',
     gap: 6,
   },
   avatar: {
-    width: 64,
-    height: 64,
+    width: 72,
+    height: 72,
     borderRadius: 999,
     backgroundColor: '#1d9bf033',
     alignItems: 'center',
     justifyContent: 'center',
     marginBottom: 6,
+  },
+  listCard: {
+    backgroundColor: colors.card,
+    borderWidth: 1,
+    borderColor: colors.border,
+    borderRadius: 18,
+    padding: 14,
+    gap: 6,
+  },
+  sectionTitle: {
+    fontWeight: '700',
   },
 });

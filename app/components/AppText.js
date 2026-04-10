@@ -14,25 +14,29 @@ const styles = StyleSheet.create({
     color: colors.text,
   },
   title: {
-    fontSize: 40,
+    fontSize: 42,
     fontWeight: '800',
-    letterSpacing: 0.5,
+    letterSpacing: 0.2,
   },
   heading: {
-    fontSize: 28,
+    fontSize: 30,
     fontWeight: '700',
+    letterSpacing: 0.1,
   },
   body: {
-    fontSize: 16,
+    fontSize: 17,
     fontWeight: '400',
+    lineHeight: 24,
   },
   muted: {
-    fontSize: 16,
+    fontSize: 15,
     color: colors.textMuted,
+    lineHeight: 22,
   },
   button: {
-    fontSize: 18,
+    fontSize: 17,
     fontWeight: '700',
     color: '#ffffff',
+    letterSpacing: 0.2,
   },
 });
