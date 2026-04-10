@@ -1,14 +1,38 @@
 import { useState } from 'react';
 import { View, StyleSheet, Alert } from 'react-native';
+import { gql } from '@apollo/client';
+import { useMutation } from '@apollo/client/react';
 import { ScreenWrapper } from '../components/ScreenWrapper';
 import { AppText } from '../components/AppText';
 import { AppInput } from '../components/AppInput';
 import { AppButton } from '../components/AppButton';
+import { GET_POSTS } from './HomeScreen';
 
-export function CreatePostScreen() {
+const ADD_POST = gql`
+  mutation AddPost($newPost: PostInput) {
+    addPost(newPost: $newPost)
+  }
+`;
+
+export function CreatePostScreen({ navigation }) {
   const [content, setContent] = useState('');
   const [tags, setTags] = useState('');
   const [imgUrl, setImgUrl] = useState('');
+
+  const [addPost, { loading }] = useMutation(ADD_POST, {
+    refetchQueries: [{ query: GET_POSTS }],
+    awaitRefetchQueries: true,
+    onCompleted: (result) => {
+      Alert.alert('Success', result?.addPost || 'Post created');
+      setContent('');
+      setTags('');
+      setImgUrl('');
+      navigation.navigate('HomeScreen');
+    },
+    onError: (error) => {
+      Alert.alert('Create Post Error', error.message);
+    },
+  });
 
   const handleSubmit = () => {
     if (!content.trim()) {
@@ -16,10 +40,20 @@ export function CreatePostScreen() {
       return;
     }
 
-    Alert.alert('Success', 'Create post UI complete for Day 3');
-    setContent('');
-    setTags('');
-    setImgUrl('');
+    const parsedTags = tags
+      .split(',')
+      .map((tag) => tag.trim())
+      .filter(Boolean);
+
+    addPost({
+      variables: {
+        newPost: {
+          content: content.trim(),
+          tags: parsedTags,
+          imgUrl: imgUrl.trim(),
+        },
+      },
+    });
   };
 
   return (
@@ -47,7 +81,7 @@ export function CreatePostScreen() {
           autoCapitalize="none"
         />
 
-        <AppButton title="Post" onPress={handleSubmit} />
+        <AppButton title={loading ? 'Posting...' : 'Post'} onPress={handleSubmit} />
       </View>
     </ScreenWrapper>
   );

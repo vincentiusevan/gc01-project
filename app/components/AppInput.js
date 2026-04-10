@@ -1,12 +1,14 @@
 import { TextInput, StyleSheet } from 'react-native';
 import { colors } from '../theme/colors';
 
-export function AppInput(props) {
+export function AppInput({ style, ...props }) {
   return (
     <TextInput
-      placeholderTextColor={colors.textMuted}
-      style={[styles.input, props.style]}
       {...props}
+      placeholderTextColor={colors.textMuted}
+      selectionColor={colors.primary}
+      cursorColor={colors.primary}
+      style={[styles.input, style]}
     />
   );
 }

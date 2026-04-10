@@ -25,7 +25,12 @@ export function LoginScreen({ navigation }) {
   const [login, { loading }] = useMutation(LOGIN, {
     onCompleted: async (result) => {
       const token = result?.login;
+      if (!token) {
+        Alert.alert('Login Error', 'Token not found from server response');
+        return;
+      }
       await SecureStore.setItemAsync('access_token', token);
+      await SecureStore.setItemAsync('username', username);
       authContext.setIsSignIn(true);
     },
     onError: (error) => {

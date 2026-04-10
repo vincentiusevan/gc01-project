@@ -1,5 +1,7 @@
-import { useContext } from 'react';
+import { useContext, useEffect, useMemo, useState } from 'react';
 import { View, StyleSheet } from 'react-native';
+import { gql } from '@apollo/client';
+import { useLazyQuery, useQuery } from '@apollo/client/react';
 import * as SecureStore from 'expo-secure-store';
 import { ScreenWrapper } from '../components/ScreenWrapper';
 import { AppText } from '../components/AppText';
@@ -7,26 +9,126 @@ import { AppButton } from '../components/AppButton';
 import { colors } from '../theme/colors';
 import AuthContext from '../contexts/AuthContext';
 
+const SEARCH_USER = gql`
+  query SearchUser($query: String) {
+    searchUser(query: $query) {
+      _id
+      name
+      username
+      email
+    }
+  }
+`;
+
+const GET_USER_BY_ID = gql`
+  query GetUserById($id: ID!) {
+    getUserById(id: $id) {
+      _id
+      name
+      username
+      email
+      followers {
+        _id
+        username
+      }
+      followings {
+        _id
+        username
+      }
+    }
+  }
+`;
+
 export function ProfileScreen() {
   const authContext = useContext(AuthContext);
-  const followers = ['dudut123', 'mentor_gc1', 'sarah'];
-  const followings = ['vincsevan', 'reactnative'];
+  const [savedUsername, setSavedUsername] = useState('');
+
+  const [searchUser, { data: searchData, loading: searchLoading, error: searchError }] =
+    useLazyQuery(SEARCH_USER);
+
+  useEffect(() => {
+    const loadUsername = async () => {
+      const username = (await SecureStore.getItemAsync('username')) || '';
+      setSavedUsername(username);
+      if (username) {
+        searchUser({ variables: { query: username } });
+      }
+    };
+
+    loadUsername();
+  }, [searchUser]);
+
+  const matchedUser = useMemo(() => {
+    const users = searchData?.searchUser || [];
+    return (
+      users.find((user) => user.username?.toLowerCase() === savedUsername.toLowerCase()) ||
+      users[0] ||
+      null
+    );
+  }, [searchData, savedUsername]);
+
+  const {
+    data: userData,
+    loading: userLoading,
+    error: userError,
+    refetch,
+  } = useQuery(GET_USER_BY_ID, {
+    variables: { id: matchedUser?._id },
+    skip: !matchedUser?._id,
+  });
 
   const handleLogout = async () => {
     await SecureStore.deleteItemAsync('access_token');
+    await SecureStore.deleteItemAsync('username');
     authContext.setIsSignIn(false);
   };
+
+  if (searchLoading || userLoading) {
+    return (
+      <ScreenWrapper>
+        <View style={styles.container}>
+          <AppText variant="muted">Loading profile...</AppText>
+        </View>
+      </ScreenWrapper>
+    );
+  }
+
+  if (searchError || userError) {
+    return (
+      <ScreenWrapper>
+        <View style={styles.container}>
+          <AppText variant="muted">{searchError?.message || userError?.message}</AppText>
+          <AppButton
+            title="Retry"
+            type="secondary"
+            onPress={() => {
+              if (matchedUser?._id) {
+                refetch();
+              } else if (savedUsername) {
+                searchUser({ variables: { query: savedUsername } });
+              }
+            }}
+          />
+          <AppButton title="Logout" type="secondary" onPress={handleLogout} />
+        </View>
+      </ScreenWrapper>
+    );
+  }
+
+  const user = userData?.getUserById;
+  const followers = user?.followers || [];
+  const followings = user?.followings || [];
 
   return (
     <ScreenWrapper>
       <View style={styles.container}>
         <View style={styles.profileCard}>
           <View style={styles.avatar}>
-            <AppText variant="heading">E</AppText>
+            <AppText variant="heading">{user?.name?.[0] || 'E'}</AppText>
           </View>
 
-          <AppText variant="heading">Evan</AppText>
-          <AppText variant="muted">@demo_user</AppText>
+          <AppText variant="heading">{user?.name || 'Unknown User'}</AppText>
+          <AppText variant="muted">@{user?.username || '-'}</AppText>
 
           <View style={styles.statsRow}>
             <View style={styles.statItem}>
@@ -44,14 +146,18 @@ export function ProfileScreen() {
           <AppText variant="body" style={styles.sectionTitle}>
             Followers
           </AppText>
-          <AppText variant="muted">{followers.join(', ')}</AppText>
+          <AppText variant="muted">
+            {followers.length ? followers.map((f) => `@${f.username}`).join(', ') : '-'}
+          </AppText>
         </View>
 
         <View style={styles.listCard}>
           <AppText variant="body" style={styles.sectionTitle}>
             Following
           </AppText>
-          <AppText variant="muted">{followings.join(', ')}</AppText>
+          <AppText variant="muted">
+            {followings.length ? followings.map((f) => `@${f.username}`).join(', ') : '-'}
+          </AppText>
         </View>
 
         <AppButton title="Logout" type="secondary" onPress={handleLogout} />

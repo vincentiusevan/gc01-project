@@ -12,6 +12,7 @@ export const GET_POSTS = gql`
       _id
       content
       author {
+        _id
         username
         name
       }
@@ -34,7 +35,7 @@ export function HomeScreen() {
   };
 
   const handleOpenUserDetail = (user) => {
-    navigation.navigate('UserDetailScreen', { user });
+    navigation.navigate('UserDetailScreen', { userId: user?._id, user });
   };
 
   const posts = data?.getPosts || [];

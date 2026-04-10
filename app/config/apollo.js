@@ -1,9 +1,24 @@
 import { ApolloClient, HttpLink, InMemoryCache } from '@apollo/client';
+import { SetContextLink } from '@apollo/client/link/context';
+import * as SecureStore from 'expo-secure-store';
+
+const httpLink = new HttpLink({
+  uri: 'http://10.0.2.2:3000',
+});
+
+const authLink = new SetContextLink(async ({ headers }) => {
+  const token = await SecureStore.getItemAsync('access_token');
+
+  return {
+    headers: {
+      ...headers,
+      ...(token ? { authorization: `Bearer ${token}` } : {}),
+    },
+  };
+});
 
 const client = new ApolloClient({
-  link: new HttpLink({
-    uri: 'http://10.0.2.2:3000',
-  }),
+  link: authLink.concat(httpLink),
   cache: new InMemoryCache(),
 });
 
