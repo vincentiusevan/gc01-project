@@ -5,7 +5,6 @@ import { HomeScreen } from '../screens/HomeScreen';
 import { CreatePostScreen } from '../screens/CreatePostScreen';
 import { PostDetailScreen } from '../screens/PostDetailScreen';
 import { SearchUnifiedScreen } from '../screens/SearchUnifiedScreen';
-import { NotificationsScreen } from '../screens/NotificationsScreen';
 import { ProfileScreen } from '../screens/ProfileScreen';
 import { UserDetailScreen } from '../screens/UserDetailScreen';
 import { colors } from '../theme/colors';
@@ -46,14 +45,6 @@ function MainTabs() {
         options={{
           title: 'Search',
           tabBarIcon: ({ color, size }) => <Ionicons name="search-outline" size={size} color={color} />,
-        }}
-      />
-      <Tab.Screen
-        name="NotificationsScreen"
-        component={NotificationsScreen}
-        options={{
-          title: 'Alerts',
-          tabBarIcon: ({ color, size }) => <Ionicons name="notifications-outline" size={size} color={color} />,
         }}
       />
     </Tab.Navigator>

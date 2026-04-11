@@ -96,9 +96,6 @@ export function HomeScreen() {
                 <Pressable onPress={() => navigation.navigate('SearchScreen')} style={styles.iconBtn}>
                   <Ionicons name="search-outline" size={19} color={colors.text} />
                 </Pressable>
-                <Pressable onPress={() => navigation.navigate('NotificationsScreen')} style={styles.iconBtn}>
-                  <Ionicons name="notifications-outline" size={19} color={colors.text} />
-                </Pressable>
               </View>
             </View>
           }
@@ -194,7 +191,7 @@ const styles = StyleSheet.create({
     alignItems: 'center',
   },
   headerActions: {
-    width: 64,
+    width: 28,
     flexDirection: 'row',
     justifyContent: 'space-between',
   },
@@ -305,7 +302,7 @@ const styles = StyleSheet.create({
   fab: {
     position: 'absolute',
     right: 14,
-    bottom: 84,
+    bottom: 24,
     width: 58,
     height: 58,
     borderRadius: 999,
