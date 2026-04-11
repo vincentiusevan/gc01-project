@@ -71,20 +71,22 @@ export function HomeScreen() {
   return (
     <ScreenWrapper>
       <View style={styles.container}>
-        <View style={styles.header}>
-          <AppText variant="title" style={styles.title}>
-            EX
-          </AppText>
-          <AppText variant="muted" style={styles.subtitle}>
-            For you
-          </AppText>
-        </View>
-
         <FlatList
           data={posts}
           keyExtractor={(item) => item._id}
           contentContainerStyle={styles.listContent}
           showsVerticalScrollIndicator={false}
+          stickyHeaderIndices={[0]}
+          ListHeaderComponent={
+            <View style={styles.header}>
+              <AppText variant="title" style={styles.title}>
+                EX
+              </AppText>
+              <AppText variant="muted" style={styles.subtitle}>
+                For you
+              </AppText>
+            </View>
+          }
           ListEmptyComponent={
             <View style={styles.emptyState}>
               <AppText variant="muted">No posts yet.</AppText>
@@ -116,21 +118,21 @@ export function HomeScreen() {
                   </AppText>
 
                   <View style={styles.actionRow}>
-                    <View style={styles.actionItem}>
+                    <Pressable style={({ pressed }) => [styles.actionItem, pressed && styles.actionPressed]}>
                       <Ionicons name="chatbubble-outline" size={16} color={colors.textMuted} />
                       <AppText variant="muted" style={styles.actionText}>
                         {item.comments?.length || 0}
                       </AppText>
-                    </View>
-                    <View style={styles.actionItem}>
+                    </Pressable>
+                    <Pressable style={({ pressed }) => [styles.actionItem, pressed && styles.actionPressed]}>
                       <Ionicons name="heart-outline" size={16} color={colors.textMuted} />
                       <AppText variant="muted" style={styles.actionText}>
                         {item.likes?.length || 0}
                       </AppText>
-                    </View>
-                    <View style={styles.actionItem}>
+                    </Pressable>
+                    <Pressable style={({ pressed }) => [styles.actionItem, pressed && styles.actionPressed]}>
                       <Ionicons name="share-social-outline" size={16} color={colors.textMuted} />
-                    </View>
+                    </Pressable>
                   </View>
                 </View>
               </View>
@@ -147,8 +149,11 @@ const styles = StyleSheet.create({
     flex: 1,
   },
   header: {
-    paddingTop: 6,
-    paddingBottom: 12,
+    paddingTop: 2,
+    paddingBottom: 10,
+    backgroundColor: colors.bg,
+    borderBottomWidth: 1,
+    borderBottomColor: colors.border,
   },
   centered: {
     flex: 1,
@@ -171,11 +176,11 @@ const styles = StyleSheet.create({
   },
   title: {
     textAlign: 'center',
-    fontSize: 40,
+    fontSize: 34,
   },
   subtitle: {
     textAlign: 'center',
-    fontSize: 14,
+    fontSize: 13,
   },
   listContent: {
     paddingBottom: 16,
@@ -238,6 +243,12 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     alignItems: 'center',
     gap: 6,
+    borderRadius: 999,
+    paddingHorizontal: 8,
+    paddingVertical: 4,
+  },
+  actionPressed: {
+    backgroundColor: colors.bgSoft,
   },
   actionText: {
     fontSize: 13,

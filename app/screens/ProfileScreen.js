@@ -129,8 +129,12 @@ export function ProfileScreen() {
             <AppText variant="heading">{user?.name?.[0] || 'E'}</AppText>
           </View>
 
-          <AppText variant="heading">{user?.name || 'Unknown User'}</AppText>
-          <AppText variant="muted">@{user?.username || '-'}</AppText>
+          <AppText variant="heading" style={styles.nameText}>
+            {user?.name || 'Unknown User'}
+          </AppText>
+          <AppText variant="muted" style={styles.usernameText}>
+            @{user?.username || '-'}
+          </AppText>
 
           <View style={styles.statsRow}>
             <View style={styles.statItem}>
@@ -179,11 +183,11 @@ const styles = StyleSheet.create({
     paddingBottom: 18,
   },
   profileCard: {
-    backgroundColor: colors.cardElevated,
-    borderWidth: 1,
-    borderColor: colors.border,
-    borderRadius: 18,
-    padding: 16,
+    borderBottomWidth: 1,
+    borderBottomColor: colors.border,
+    borderRadius: 0,
+    paddingHorizontal: 4,
+    paddingBottom: 14,
     alignItems: 'center',
     gap: 6,
   },
@@ -196,19 +200,25 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
     marginBottom: 6,
   },
+  nameText: {
+    marginTop: 2,
+  },
+  usernameText: {
+    marginTop: -2,
+  },
   statsRow: {
     flexDirection: 'row',
-    gap: 20,
+    gap: 28,
     marginTop: 8,
   },
   statItem: {
     alignItems: 'center',
   },
   listCard: {
-    backgroundColor: colors.card,
+    backgroundColor: colors.bg,
     borderWidth: 1,
     borderColor: colors.border,
-    borderRadius: 18,
+    borderRadius: 16,
     padding: 14,
     gap: 6,
   },

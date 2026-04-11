@@ -22,13 +22,13 @@ function MainTabs() {
           backgroundColor: colors.bg,
           borderTopColor: colors.border,
           borderTopWidth: 0.8,
-          height: 68,
+          height: 74,
           paddingTop: 8,
-          paddingBottom: 8,
+          paddingBottom: 10,
         },
         tabBarActiveTintColor: colors.primary,
         tabBarInactiveTintColor: colors.textMuted,
-        tabBarLabelStyle: { fontSize: 12, fontWeight: '700' },
+        tabBarLabelStyle: { fontSize: 11, fontWeight: '700', marginTop: -1 },
       }}
     >
       <Tab.Screen
