@@ -4,7 +4,8 @@ import { Ionicons } from '@expo/vector-icons';
 import { HomeScreen } from '../screens/HomeScreen';
 import { CreatePostScreen } from '../screens/CreatePostScreen';
 import { PostDetailScreen } from '../screens/PostDetailScreen';
-import { SearchScreen } from '../screens/SearchScreen';
+import { SearchUnifiedScreen } from '../screens/SearchUnifiedScreen';
+import { NotificationsScreen } from '../screens/NotificationsScreen';
 import { ProfileScreen } from '../screens/ProfileScreen';
 import { UserDetailScreen } from '../screens/UserDetailScreen';
 import { colors } from '../theme/colors';
@@ -40,29 +41,19 @@ function MainTabs() {
         }}
       />
       <Tab.Screen
-        name="CreatePostScreen"
-        component={CreatePostScreen}
-        options={{
-          title: 'Create',
-          tabBarIcon: ({ color, size }) => (
-            <Ionicons name="add-circle-outline" size={size} color={color} />
-          ),
-        }}
-      />
-      <Tab.Screen
         name="SearchScreen"
-        component={SearchScreen}
+        component={SearchUnifiedScreen}
         options={{
           title: 'Search',
           tabBarIcon: ({ color, size }) => <Ionicons name="search-outline" size={size} color={color} />,
         }}
       />
       <Tab.Screen
-        name="ProfileScreen"
-        component={ProfileScreen}
+        name="NotificationsScreen"
+        component={NotificationsScreen}
         options={{
-          title: 'Profile',
-          tabBarIcon: ({ color, size }) => <Ionicons name="person-outline" size={size} color={color} />,
+          title: 'Alerts',
+          tabBarIcon: ({ color, size }) => <Ionicons name="notifications-outline" size={size} color={color} />,
         }}
       />
     </Tab.Navigator>
@@ -80,6 +71,16 @@ export default function HomeNavigator() {
       }}
     >
       <Stack.Screen name="MainTabs" options={{ headerShown: false }} component={MainTabs} />
+      <Stack.Screen
+        name="CreatePostScreen"
+        component={CreatePostScreen}
+        options={{ headerShown: true, title: 'Create Post' }}
+      />
+      <Stack.Screen
+        name="ProfileScreen"
+        component={ProfileScreen}
+        options={{ headerShown: true, title: 'Profile' }}
+      />
       <Stack.Screen
         name="PostDetailScreen"
         component={PostDetailScreen}

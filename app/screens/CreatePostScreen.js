@@ -29,7 +29,7 @@ export function CreatePostScreen({ navigation }) {
       setContent('');
       setTags('');
       setImgUrl('');
-      navigation.navigate('HomeScreen');
+      navigation.navigate('MainTabs', { screen: 'HomeScreen' });
     },
     onError: (error) => {
       Alert.alert('Create Post Error', error.message);

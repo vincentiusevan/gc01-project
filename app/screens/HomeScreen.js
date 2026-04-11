@@ -79,12 +79,27 @@ export function HomeScreen() {
           stickyHeaderIndices={[0]}
           ListHeaderComponent={
             <View style={styles.header}>
-              <AppText variant="title" style={styles.title}>
-                EX
-              </AppText>
-              <AppText variant="muted" style={styles.subtitle}>
-                For you
-              </AppText>
+              <Pressable style={styles.avatarBtn} onPress={() => navigation.navigate('ProfileScreen')}>
+                <AppText variant="body" style={styles.avatarBtnText}>
+                  P
+                </AppText>
+              </Pressable>
+              <View style={styles.headerCenter}>
+                <AppText variant="title" style={styles.title}>
+                  EX
+                </AppText>
+                <AppText variant="muted" style={styles.subtitle}>
+                  Home
+                </AppText>
+              </View>
+              <View style={styles.headerActions}>
+                <Pressable onPress={() => navigation.navigate('SearchScreen')} style={styles.iconBtn}>
+                  <Ionicons name="search-outline" size={19} color={colors.text} />
+                </Pressable>
+                <Pressable onPress={() => navigation.navigate('NotificationsScreen')} style={styles.iconBtn}>
+                  <Ionicons name="notifications-outline" size={19} color={colors.text} />
+                </Pressable>
+              </View>
             </View>
           }
           ListEmptyComponent={
@@ -139,6 +154,10 @@ export function HomeScreen() {
             </Pressable>
           )}
         />
+
+        <Pressable style={styles.fab} onPress={() => navigation.navigate('CreatePostScreen')}>
+          <Ionicons name="add" size={30} color={colors.white} />
+        </Pressable>
       </View>
     </ScreenWrapper>
   );
@@ -147,13 +166,43 @@ export function HomeScreen() {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
+    position: 'relative',
   },
   header: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
     paddingTop: 2,
     paddingBottom: 10,
     backgroundColor: colors.bg,
     borderBottomWidth: 1,
     borderBottomColor: colors.border,
+  },
+  avatarBtn: {
+    width: 34,
+    height: 34,
+    borderRadius: 999,
+    backgroundColor: '#1d9bf033',
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  avatarBtnText: {
+    color: colors.primary,
+    fontWeight: '700',
+  },
+  headerCenter: {
+    alignItems: 'center',
+  },
+  headerActions: {
+    width: 64,
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+  },
+  iconBtn: {
+    width: 28,
+    height: 28,
+    alignItems: 'center',
+    justifyContent: 'center',
   },
   centered: {
     flex: 1,
@@ -183,7 +232,7 @@ const styles = StyleSheet.create({
     fontSize: 13,
   },
   listContent: {
-    paddingBottom: 16,
+    paddingBottom: 100,
   },
   emptyState: {
     paddingTop: 20,
@@ -252,5 +301,17 @@ const styles = StyleSheet.create({
   },
   actionText: {
     fontSize: 13,
+  },
+  fab: {
+    position: 'absolute',
+    right: 14,
+    bottom: 84,
+    width: 58,
+    height: 58,
+    borderRadius: 999,
+    backgroundColor: colors.primary,
+    alignItems: 'center',
+    justifyContent: 'center',
+    elevation: 4,
   },
 });
