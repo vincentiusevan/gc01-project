@@ -20,6 +20,7 @@ const GET_POST_BY_ID = gql`
       author {
         username
         name
+        profileImage
       }
       comments {
         content
@@ -137,7 +138,8 @@ export function PostDetailScreen({ route }) {
 
   const post = data?.getPostById;
   const isLiked = post?.likes?.some((like) => like.username === myUsername);
-  const isMyPost = post?.author?.username === myUsername && profileImage;
+  const authorProfileImage =
+    post?.author?.profileImage || (post?.author?.username === myUsername ? profileImage : '');
 
   return (
     <ScreenWrapper>
@@ -150,8 +152,8 @@ export function PostDetailScreen({ route }) {
         <View style={styles.card}>
           <View style={styles.authorRow}>
             <View style={styles.avatar}>
-              {isMyPost ? (
-                <Image source={{ uri: profileImage }} style={styles.avatarImage} />
+              {authorProfileImage ? (
+                <Image source={{ uri: authorProfileImage }} style={styles.avatarImage} />
               ) : (
                 <AppText variant="body" style={styles.avatarText}>
                   {(post?.author?.name?.[0] || post?.author?.username?.[0] || '?').toUpperCase()}

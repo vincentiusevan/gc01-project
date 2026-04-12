@@ -6,6 +6,7 @@ export const userTypeDefs = `#graphql
     name: String
     username: String
     email: String
+    profileImage: String
   }
 
   type User {
@@ -13,6 +14,7 @@ export const userTypeDefs = `#graphql
     name: String
     username: String
     email: String
+    profileImage: String
     followers: [FollowDetail]
     followings: [FollowDetail]
   }
@@ -32,6 +34,7 @@ export const userTypeDefs = `#graphql
   type Mutation {
     register(newUser: RegisterInput): String
     login(username: String, password: String): String
+    updateProfileImage(profileImage: String): String
   }
 `;
 
@@ -47,6 +50,12 @@ export const userResolvers = {
       const token = await User.login(username, password);
 
       return token;
+    },
+    updateProfileImage: async (_, args, contextValue) => {
+      const user = await contextValue.authN();
+      const message = await User.updateProfileImage(user._id, args.profileImage);
+
+      return message;
     },
   },
   Query: {

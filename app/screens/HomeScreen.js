@@ -19,6 +19,7 @@ export const GET_POSTS = gql`
         _id
         username
         name
+        profileImage
       }
       comments {
         content
@@ -165,14 +166,15 @@ export function HomeScreen() {
           }
           renderItem={({ item }) => {
             const imageUrl = typeof item.imgUrl === 'string' ? item.imgUrl.trim() : '';
-            const isMyPost = item.author?.username === myUsername && profileImage;
+            const authorProfileImage =
+              item.author?.profileImage || (item.author?.username === myUsername ? profileImage : '');
 
             return (
               <Pressable style={styles.card} onPress={() => handleOpenPostDetail(item)}>
                 <View style={styles.rowTop}>
                   <Pressable style={styles.avatar} onPress={() => handleOpenUserDetail(item.author)}>
-                    {isMyPost ? (
-                      <Image source={{ uri: profileImage }} style={styles.avatarImage} />
+                    {authorProfileImage ? (
+                      <Image source={{ uri: authorProfileImage }} style={styles.avatarImage} />
                     ) : (
                       <AppText variant="body" style={styles.avatarText}>
                         {(item.author?.name?.[0] || item.author?.username?.[0] || '?').toUpperCase()}

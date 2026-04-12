@@ -1,7 +1,7 @@
 import { useContext, useEffect, useMemo, useState } from 'react';
 import { Alert, Image, Pressable, View, StyleSheet, ScrollView } from 'react-native';
 import { gql } from '@apollo/client';
-import { useLazyQuery, useQuery } from '@apollo/client/react';
+import { useLazyQuery, useMutation, useQuery } from '@apollo/client/react';
 import * as SecureStore from 'expo-secure-store';
 import * as ImagePicker from 'expo-image-picker';
 import { ScreenWrapper } from '../components/ScreenWrapper';
@@ -18,6 +18,7 @@ const SEARCH_USER = gql`
       name
       username
       email
+      profileImage
     }
   }
 `;
@@ -29,6 +30,7 @@ const GET_USER_BY_ID = gql`
       name
       username
       email
+      profileImage
       followers {
         _id
         username
@@ -38,6 +40,12 @@ const GET_USER_BY_ID = gql`
         username
       }
     }
+  }
+`;
+
+const UPDATE_PROFILE_IMAGE = gql`
+  mutation UpdateProfileImage($profileImage: String) {
+    updateProfileImage(profileImage: $profileImage)
   }
 `;
 
@@ -82,7 +90,10 @@ export function ProfileScreen() {
   } = useQuery(GET_USER_BY_ID, {
     variables: { id: matchedUser?._id },
     skip: !matchedUser?._id,
+    fetchPolicy: 'network-only',
   });
+
+  const [updateProfileImage] = useMutation(UPDATE_PROFILE_IMAGE);
 
   const handleLogout = async () => {
     await SecureStore.deleteItemAsync('access_token');
@@ -130,8 +141,14 @@ export function ProfileScreen() {
 
       setUploading(true);
       const imageUrl = await uploadProfileImage(result.assets[0]);
+      await updateProfileImage({
+        variables: {
+          profileImage: imageUrl,
+        },
+      });
       await SecureStore.setItemAsync('profile_image_url', imageUrl);
       setProfileImage(imageUrl);
+      await refetch();
       Alert.alert('Success', 'Profile photo updated.');
     } catch (errorUpload) {
       Alert.alert('Edit Profile Error', errorUpload.message || 'Failed to update profile photo');
@@ -173,6 +190,7 @@ export function ProfileScreen() {
   }
 
   const user = userData?.getUserById;
+  const currentProfileImage = user?.profileImage || profileImage;
   const followers = user?.followers || [];
   const followings = user?.followings || [];
 
@@ -183,8 +201,8 @@ export function ProfileScreen() {
 
         <View style={styles.profileCard}>
           <View style={styles.avatar}>
-            {profileImage ? (
-              <Image source={{ uri: profileImage }} style={styles.avatarImage} />
+            {currentProfileImage ? (
+              <Image source={{ uri: currentProfileImage }} style={styles.avatarImage} />
             ) : (
               <AppText variant="heading">{user?.name?.[0] || 'E'}</AppText>
             )}
