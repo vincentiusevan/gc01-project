@@ -1,8 +1,9 @@
-import { useState } from 'react';
-import { View, StyleSheet, Alert, Image, ScrollView } from 'react-native';
+import { useEffect, useState } from 'react';
+import { View, StyleSheet, Alert, Image, ScrollView, Pressable } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import { gql } from '@apollo/client';
 import { useMutation, useQuery } from '@apollo/client/react';
+import * as SecureStore from 'expo-secure-store';
 
 import { ScreenWrapper } from '../components/ScreenWrapper';
 import { AppText } from '../components/AppText';
@@ -45,11 +46,13 @@ const LIKE_POST = gql`
 
 export function PostDetailScreen({ route }) {
   const [comment, setComment] = useState('');
+  const [myUsername, setMyUsername] = useState('');
   const postId = route.params?.post?._id || route.params?.postId;
 
   const { data, loading, error, refetch } = useQuery(GET_POST_BY_ID, {
     variables: { id: postId },
     skip: !postId,
+    fetchPolicy: 'network-only',
   });
 
   const [commentPost, { loading: commentLoading }] = useMutation(COMMENT_POST, {
@@ -64,10 +67,18 @@ export function PostDetailScreen({ route }) {
   const [likePost, { loading: likeLoading }] = useMutation(LIKE_POST, {
     onCompleted: async () => {
       await refetch();
-      Alert.alert('Success', 'Post liked');
     },
     onError: (err) => Alert.alert('Like Error', err.message),
   });
+
+  useEffect(() => {
+    const loadUsername = async () => {
+      const username = (await SecureStore.getItemAsync('username')) || '';
+      setMyUsername(username);
+    };
+
+    loadUsername();
+  }, []);
 
   const handleComment = () => {
     if (!comment.trim()) {
@@ -122,6 +133,7 @@ export function PostDetailScreen({ route }) {
   }
 
   const post = data?.getPostById;
+  const isLiked = post?.likes?.some((like) => like.username === myUsername);
 
   return (
     <ScreenWrapper>
@@ -149,23 +161,28 @@ export function PostDetailScreen({ route }) {
                 {post?.comments?.length || 0}
               </AppText>
             </View>
-            <View style={styles.actionItem}>
-              <Ionicons name="heart-outline" size={16} color={colors.textMuted} />
-              <AppText variant="muted" style={styles.actionText}>
+            <Pressable
+              style={({ pressed }) => [styles.actionItem, pressed && styles.actionPressed]}
+              onPress={handleLike}
+              disabled={likeLoading}
+            >
+              <Ionicons
+                name={isLiked ? 'heart' : 'heart-outline'}
+                size={16}
+                color={isLiked ? colors.primary : colors.textMuted}
+              />
+              <AppText
+                variant="muted"
+                style={[styles.actionText, isLiked && styles.likedText]}
+              >
                 {post?.likes?.length || 0}
               </AppText>
-            </View>
+            </Pressable>
             <View style={styles.actionItem}>
               <Ionicons name="share-social-outline" size={16} color={colors.textMuted} />
             </View>
           </View>
         </View>
-
-        <AppButton
-          title={likeLoading ? 'Liking...' : 'Like Post'}
-          onPress={handleLike}
-          type="secondary"
-        />
 
         <AppText variant="muted">Write a comment</AppText>
         <AppInput
@@ -253,9 +270,18 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     alignItems: 'center',
     gap: 6,
+    borderRadius: 999,
+    paddingHorizontal: 8,
+    paddingVertical: 4,
+  },
+  actionPressed: {
+    backgroundColor: colors.bgSoft,
   },
   actionText: {
     fontSize: 13,
+  },
+  likedText: {
+    color: colors.primary,
   },
   commentInput: {
     minHeight: 90,

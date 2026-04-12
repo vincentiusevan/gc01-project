@@ -1,8 +1,10 @@
+import { useEffect, useState } from 'react';
 import { useNavigation } from '@react-navigation/native';
-import { View, StyleSheet, FlatList, Pressable } from 'react-native';
+import { View, StyleSheet, FlatList, Pressable, Alert } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import { gql } from '@apollo/client';
-import { useQuery } from '@apollo/client/react';
+import { useMutation, useQuery } from '@apollo/client/react';
+import * as SecureStore from 'expo-secure-store';
 import { ScreenWrapper } from '../components/ScreenWrapper';
 import { AppText } from '../components/AppText';
 import { colors } from '../theme/colors';
@@ -28,9 +30,28 @@ export const GET_POSTS = gql`
   }
 `;
 
+const LIKE_POST = gql`
+  mutation LikePost($postId: ID) {
+    likePost(postId: $postId)
+  }
+`;
+
 export function HomeScreen() {
   const navigation = useNavigation();
-  const { data, loading, error, refetch } = useQuery(GET_POSTS);
+  const [myUsername, setMyUsername] = useState('');
+  const { data, loading, error, refetch } = useQuery(GET_POSTS, {
+    fetchPolicy: 'network-only',
+  });
+  const [likePost] = useMutation(LIKE_POST);
+
+  useEffect(() => {
+    const loadUsername = async () => {
+      const username = (await SecureStore.getItemAsync('username')) || '';
+      setMyUsername(username);
+    };
+
+    loadUsername();
+  }, []);
 
   const handleOpenPostDetail = (post) => {
     navigation.navigate('PostDetailScreen', { post });
@@ -38,6 +59,25 @@ export function HomeScreen() {
 
   const handleOpenUserDetail = (user) => {
     navigation.navigate('UserDetailScreen', { userId: user?._id, user });
+  };
+
+  const handleCommentPress = (event, post) => {
+    event.stopPropagation();
+    navigation.navigate('PostDetailScreen', { post, focusComment: true });
+  };
+
+  const handleLikePress = async (event, postId) => {
+    event.stopPropagation();
+    try {
+      await likePost({
+        variables: {
+          postId,
+        },
+      });
+      await refetch();
+    } catch (errorLike) {
+      Alert.alert('Like Error', errorLike.message || 'Failed to like post');
+    }
   };
 
   const posts = data?.getPosts || [];
@@ -130,15 +170,39 @@ export function HomeScreen() {
                   </AppText>
 
                   <View style={styles.actionRow}>
-                    <Pressable style={({ pressed }) => [styles.actionItem, pressed && styles.actionPressed]}>
+                    <Pressable
+                      style={({ pressed }) => [styles.actionItem, pressed && styles.actionPressed]}
+                      onPress={(event) => handleCommentPress(event, item)}
+                    >
                       <Ionicons name="chatbubble-outline" size={16} color={colors.textMuted} />
                       <AppText variant="muted" style={styles.actionText}>
                         {item.comments?.length || 0}
                       </AppText>
                     </Pressable>
-                    <Pressable style={({ pressed }) => [styles.actionItem, pressed && styles.actionPressed]}>
-                      <Ionicons name="heart-outline" size={16} color={colors.textMuted} />
-                      <AppText variant="muted" style={styles.actionText}>
+                    <Pressable
+                      style={({ pressed }) => [styles.actionItem, pressed && styles.actionPressed]}
+                      onPress={(event) => handleLikePress(event, item._id)}
+                    >
+                      <Ionicons
+                        name={
+                          item.likes?.some((like) => like.username === myUsername)
+                            ? 'heart'
+                            : 'heart-outline'
+                        }
+                        size={16}
+                        color={
+                          item.likes?.some((like) => like.username === myUsername)
+                            ? colors.primary
+                            : colors.textMuted
+                        }
+                      />
+                      <AppText
+                        variant="muted"
+                        style={[
+                          styles.actionText,
+                          item.likes?.some((like) => like.username === myUsername) && styles.likedText,
+                        ]}
+                      >
                         {item.likes?.length || 0}
                       </AppText>
                     </Pressable>
@@ -298,6 +362,9 @@ const styles = StyleSheet.create({
   },
   actionText: {
     fontSize: 13,
+  },
+  likedText: {
+    color: colors.primary,
   },
   fab: {
     position: 'absolute',

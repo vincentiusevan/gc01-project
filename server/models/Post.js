@@ -116,6 +116,7 @@ export default class Post {
     };
 
     await collection.updateOne({ _id }, { $push: { comments: comment } });
+    await redis.del('posts:all');
 
     return 'Komentar berhasil ditambahkan';
   }
@@ -128,7 +129,11 @@ export default class Post {
     if (!post) throw new Error('Post not found');
 
     const alreadyLiked = post.likes.find((like) => like.username === username);
-    if (alreadyLiked) throw new Error('You already liked this post');
+    if (alreadyLiked) {
+      await collection.updateOne({ _id }, { $pull: { likes: { username } } });
+      await redis.del('posts:all');
+      return 'Post berhasil di-unlike';
+    }
 
     const like = {
       username,
@@ -137,6 +142,7 @@ export default class Post {
     };
 
     await collection.updateOne({ _id }, { $push: { likes: like } });
+    await redis.del('posts:all');
 
     return 'Post berhasil di-like';
   }
