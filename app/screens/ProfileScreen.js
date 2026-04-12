@@ -1,13 +1,15 @@
 import { useContext, useEffect, useMemo, useState } from 'react';
-import { View, StyleSheet, ScrollView } from 'react-native';
+import { Alert, Image, Pressable, View, StyleSheet, ScrollView } from 'react-native';
 import { gql } from '@apollo/client';
 import { useLazyQuery, useQuery } from '@apollo/client/react';
 import * as SecureStore from 'expo-secure-store';
+import * as ImagePicker from 'expo-image-picker';
 import { ScreenWrapper } from '../components/ScreenWrapper';
 import { AppText } from '../components/AppText';
 import { AppButton } from '../components/AppButton';
 import { colors } from '../theme/colors';
 import AuthContext from '../contexts/AuthContext';
+import { CLOUDINARY_CLOUD_NAME, CLOUDINARY_UPLOAD_PRESET } from '../config/cloudinary';
 
 const SEARCH_USER = gql`
   query SearchUser($query: String) {
@@ -42,6 +44,9 @@ const GET_USER_BY_ID = gql`
 export function ProfileScreen() {
   const authContext = useContext(AuthContext);
   const [savedUsername, setSavedUsername] = useState('');
+  const [activeList, setActiveList] = useState('');
+  const [profileImage, setProfileImage] = useState('');
+  const [uploading, setUploading] = useState(false);
 
   const [searchUser, { data: searchData, loading: searchLoading, error: searchError }] =
     useLazyQuery(SEARCH_USER);
@@ -49,7 +54,9 @@ export function ProfileScreen() {
   useEffect(() => {
     const loadUsername = async () => {
       const username = (await SecureStore.getItemAsync('username')) || '';
+      const imageUrl = (await SecureStore.getItemAsync('profile_image_url')) || '';
       setSavedUsername(username);
+      setProfileImage(imageUrl);
       if (username) {
         searchUser({ variables: { query: username } });
       }
@@ -81,6 +88,56 @@ export function ProfileScreen() {
     await SecureStore.deleteItemAsync('access_token');
     await SecureStore.deleteItemAsync('username');
     authContext.setIsSignIn(false);
+  };
+
+  const uploadProfileImage = async (image) => {
+    const data = new FormData();
+    data.append('file', {
+      uri: image.uri,
+      type: image.mimeType || 'image/jpeg',
+      name: image.fileName || 'profile-image.jpg',
+    });
+    data.append('upload_preset', CLOUDINARY_UPLOAD_PRESET);
+
+    const response = await fetch(
+      `https://api.cloudinary.com/v1_1/${CLOUDINARY_CLOUD_NAME}/image/upload`,
+      {
+        method: 'POST',
+        body: data,
+      },
+    );
+
+    const result = await response.json();
+    if (!response.ok) throw new Error(result?.error?.message || 'Upload profile image failed');
+
+    return result.secure_url;
+  };
+
+  const handleEditProfile = async () => {
+    try {
+      const permission = await ImagePicker.requestMediaLibraryPermissionsAsync();
+      if (!permission.granted) {
+        Alert.alert('Permission needed', 'Please allow gallery access to update profile photo.');
+        return;
+      }
+
+      const result = await ImagePicker.launchImageLibraryAsync({
+        mediaTypes: ['images'],
+        quality: 0.8,
+      });
+
+      if (result.canceled) return;
+
+      setUploading(true);
+      const imageUrl = await uploadProfileImage(result.assets[0]);
+      await SecureStore.setItemAsync('profile_image_url', imageUrl);
+      setProfileImage(imageUrl);
+      Alert.alert('Success', 'Profile photo updated.');
+    } catch (errorUpload) {
+      Alert.alert('Edit Profile Error', errorUpload.message || 'Failed to update profile photo');
+    } finally {
+      setUploading(false);
+    }
   };
 
   if (searchLoading || userLoading) {
@@ -126,7 +183,11 @@ export function ProfileScreen() {
 
         <View style={styles.profileCard}>
           <View style={styles.avatar}>
-            <AppText variant="heading">{user?.name?.[0] || 'E'}</AppText>
+            {profileImage ? (
+              <Image source={{ uri: profileImage }} style={styles.avatarImage} />
+            ) : (
+              <AppText variant="heading">{user?.name?.[0] || 'E'}</AppText>
+            )}
           </View>
 
           <AppText variant="heading" style={styles.nameText}>
@@ -136,35 +197,48 @@ export function ProfileScreen() {
             @{user?.username || '-'}
           </AppText>
 
+          <Pressable
+            style={({ pressed }) => [styles.editButton, pressed && styles.buttonPressed]}
+            onPress={handleEditProfile}
+            disabled={uploading}
+          >
+            <AppText variant="body" style={styles.editButtonText}>
+              {uploading ? 'Uploading...' : 'Edit Profile'}
+            </AppText>
+          </Pressable>
+
           <View style={styles.statsRow}>
-            <View style={styles.statItem}>
+            <Pressable
+              style={({ pressed }) => [styles.statItem, pressed && styles.buttonPressed]}
+              onPress={() => setActiveList(activeList === 'followers' ? '' : 'followers')}
+            >
               <AppText variant="heading">{followers.length}</AppText>
               <AppText variant="muted">Followers</AppText>
-            </View>
-            <View style={styles.statItem}>
+            </Pressable>
+            <Pressable
+              style={({ pressed }) => [styles.statItem, pressed && styles.buttonPressed]}
+              onPress={() => setActiveList(activeList === 'followings' ? '' : 'followings')}
+            >
               <AppText variant="heading">{followings.length}</AppText>
               <AppText variant="muted">Following</AppText>
-            </View>
+            </Pressable>
           </View>
         </View>
 
-        <View style={styles.listCard}>
-          <AppText variant="body" style={styles.sectionTitle}>
-            Followers
-          </AppText>
-          <AppText variant="muted">
-            {followers.length ? followers.map((f) => `@${f.username}`).join(', ') : '-'}
-          </AppText>
-        </View>
-
-        <View style={styles.listCard}>
-          <AppText variant="body" style={styles.sectionTitle}>
-            Following
-          </AppText>
-          <AppText variant="muted">
-            {followings.length ? followings.map((f) => `@${f.username}`).join(', ') : '-'}
-          </AppText>
-        </View>
+        {activeList ? (
+          <View style={styles.listCard}>
+            <AppText variant="body" style={styles.sectionTitle}>
+              {activeList === 'followers' ? 'Followers' : 'Following'}
+            </AppText>
+            <AppText variant="muted">
+              {(activeList === 'followers' ? followers : followings).length
+                ? (activeList === 'followers' ? followers : followings)
+                    .map((userFollow) => `@${userFollow.username}`)
+                    .join(', ')
+                : '-'}
+            </AppText>
+          </View>
+        ) : null}
 
         <AppButton title="Logout" type="secondary" onPress={handleLogout} />
       </ScrollView>
@@ -199,12 +273,31 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     justifyContent: 'center',
     marginBottom: 6,
+    overflow: 'hidden',
+  },
+  avatarImage: {
+    width: '100%',
+    height: '100%',
   },
   nameText: {
     marginTop: 2,
   },
   usernameText: {
     marginTop: -2,
+  },
+  editButton: {
+    borderWidth: 1,
+    borderColor: colors.border,
+    borderRadius: 999,
+    paddingHorizontal: 22,
+    paddingVertical: 9,
+    marginTop: 10,
+  },
+  editButtonText: {
+    fontWeight: '700',
+  },
+  buttonPressed: {
+    opacity: 0.65,
   },
   statsRow: {
     flexDirection: 'row',

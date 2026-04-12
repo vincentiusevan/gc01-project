@@ -2,6 +2,8 @@ import { ObjectId } from 'mongodb';
 import { getDB } from '../config/mongodb.js';
 import { redis } from '../config/redis.js';
 
+const POSTS_CACHE_KEY = 'posts:all:v2';
+
 export default class Post {
   static getCollection() {
     const db = getDB();
@@ -11,7 +13,7 @@ export default class Post {
   }
 
   static async getPosts() {
-    const cache = await redis.get('posts:all');
+    const cache = await redis.get(POSTS_CACHE_KEY);
     if (cache) return JSON.parse(cache);
 
     const collection = this.getCollection();
@@ -45,7 +47,7 @@ export default class Post {
       ])
       .toArray();
 
-    await redis.set('posts:all', JSON.stringify(posts));
+    await redis.set(POSTS_CACHE_KEY, JSON.stringify(posts));
     return posts;
   }
 
@@ -97,7 +99,7 @@ export default class Post {
     };
 
     await collection.insertOne(newPost);
-    await redis.del('posts:all');
+    await redis.del(POSTS_CACHE_KEY);
 
     return 'Post berhasil ditambahkan';
   }
@@ -116,7 +118,7 @@ export default class Post {
     };
 
     await collection.updateOne({ _id }, { $push: { comments: comment } });
-    await redis.del('posts:all');
+    await redis.del(POSTS_CACHE_KEY);
 
     return 'Komentar berhasil ditambahkan';
   }
@@ -131,7 +133,7 @@ export default class Post {
     const alreadyLiked = post.likes.find((like) => like.username === username);
     if (alreadyLiked) {
       await collection.updateOne({ _id }, { $pull: { likes: { username } } });
-      await redis.del('posts:all');
+      await redis.del(POSTS_CACHE_KEY);
       return 'Post berhasil di-unlike';
     }
 
@@ -142,7 +144,7 @@ export default class Post {
     };
 
     await collection.updateOne({ _id }, { $push: { likes: like } });
-    await redis.del('posts:all');
+    await redis.del(POSTS_CACHE_KEY);
 
     return 'Post berhasil di-like';
   }

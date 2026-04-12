@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react';
 import { useNavigation } from '@react-navigation/native';
-import { View, StyleSheet, FlatList, Pressable, Alert } from 'react-native';
+import { View, StyleSheet, FlatList, Pressable, Alert, Image } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import { gql } from '@apollo/client';
 import { useMutation, useQuery } from '@apollo/client/react';
@@ -14,6 +14,7 @@ export const GET_POSTS = gql`
     getPosts {
       _id
       content
+      imgUrl
       author {
         _id
         username
@@ -39,19 +40,33 @@ const LIKE_POST = gql`
 export function HomeScreen() {
   const navigation = useNavigation();
   const [myUsername, setMyUsername] = useState('');
+  const [profileImage, setProfileImage] = useState('');
   const { data, loading, error, refetch } = useQuery(GET_POSTS, {
-    fetchPolicy: 'network-only',
+    fetchPolicy: 'no-cache',
   });
   const [likePost] = useMutation(LIKE_POST);
 
   useEffect(() => {
     const loadUsername = async () => {
       const username = (await SecureStore.getItemAsync('username')) || '';
+      const imageUrl = (await SecureStore.getItemAsync('profile_image_url')) || '';
       setMyUsername(username);
+      setProfileImage(imageUrl);
     };
 
     loadUsername();
   }, []);
+
+  useEffect(() => {
+    const unsubscribe = navigation.addListener('focus', () => {
+      SecureStore.getItemAsync('profile_image_url').then((imageUrl) => {
+        setProfileImage(imageUrl || '');
+      });
+      refetch();
+    });
+
+    return unsubscribe;
+  }, [navigation, refetch]);
 
   const handleOpenPostDetail = (post) => {
     navigation.navigate('PostDetailScreen', { post });
@@ -120,9 +135,13 @@ export function HomeScreen() {
           ListHeaderComponent={
             <View style={styles.header}>
               <Pressable style={styles.avatarBtn} onPress={() => navigation.navigate('ProfileScreen')}>
-                <AppText variant="body" style={styles.avatarBtnText}>
-                  P
-                </AppText>
+                {profileImage ? (
+                  <Image source={{ uri: profileImage }} style={styles.avatarImage} />
+                ) : (
+                  <AppText variant="body" style={styles.avatarBtnText}>
+                    P
+                  </AppText>
+                )}
               </Pressable>
               <View style={styles.headerCenter}>
                 <AppText variant="title" style={styles.title}>
@@ -144,76 +163,93 @@ export function HomeScreen() {
               <AppText variant="muted">No posts yet.</AppText>
             </View>
           }
-          renderItem={({ item }) => (
-            <Pressable style={styles.card} onPress={() => handleOpenPostDetail(item)}>
-              <View style={styles.rowTop}>
-                <Pressable style={styles.avatar} onPress={() => handleOpenUserDetail(item.author)}>
-                  <AppText variant="body" style={styles.avatarText}>
-                    {(item.author?.name?.[0] || item.author?.username?.[0] || '?').toUpperCase()}
-                  </AppText>
-                </Pressable>
+          renderItem={({ item }) => {
+            const imageUrl = typeof item.imgUrl === 'string' ? item.imgUrl.trim() : '';
+            const isMyPost = item.author?.username === myUsername && profileImage;
 
-                <View style={styles.contentWrap}>
-                  <Pressable onPress={() => handleOpenUserDetail(item.author)}>
-                    <View style={styles.userRow}>
-                      <AppText variant="body" style={styles.name}>
-                        {item.author?.name || 'Unknown'}
+            return (
+              <Pressable style={styles.card} onPress={() => handleOpenPostDetail(item)}>
+                <View style={styles.rowTop}>
+                  <Pressable style={styles.avatar} onPress={() => handleOpenUserDetail(item.author)}>
+                    {isMyPost ? (
+                      <Image source={{ uri: profileImage }} style={styles.avatarImage} />
+                    ) : (
+                      <AppText variant="body" style={styles.avatarText}>
+                        {(item.author?.name?.[0] || item.author?.username?.[0] || '?').toUpperCase()}
                       </AppText>
-                      <AppText variant="muted" style={styles.username}>
-                        @{item.author?.username || 'unknown'}
-                      </AppText>
-                    </View>
+                    )}
                   </Pressable>
 
-                  <AppText variant="body" style={styles.content}>
-                    {item.content || '-'}
-                  </AppText>
+                  <View style={styles.contentWrap}>
+                    <Pressable onPress={() => handleOpenUserDetail(item.author)}>
+                      <View style={styles.userRow}>
+                        <AppText variant="body" style={styles.name}>
+                          {item.author?.name || 'Unknown'}
+                        </AppText>
+                        <AppText variant="muted" style={styles.username}>
+                          @{item.author?.username || 'unknown'}
+                        </AppText>
+                      </View>
+                    </Pressable>
 
-                  <View style={styles.actionRow}>
-                    <Pressable
-                      style={({ pressed }) => [styles.actionItem, pressed && styles.actionPressed]}
-                      onPress={(event) => handleCommentPress(event, item)}
-                    >
-                      <Ionicons name="chatbubble-outline" size={16} color={colors.textMuted} />
-                      <AppText variant="muted" style={styles.actionText}>
-                        {item.comments?.length || 0}
-                      </AppText>
-                    </Pressable>
-                    <Pressable
-                      style={({ pressed }) => [styles.actionItem, pressed && styles.actionPressed]}
-                      onPress={(event) => handleLikePress(event, item._id)}
-                    >
-                      <Ionicons
-                        name={
-                          item.likes?.some((like) => like.username === myUsername)
-                            ? 'heart'
-                            : 'heart-outline'
-                        }
-                        size={16}
-                        color={
-                          item.likes?.some((like) => like.username === myUsername)
-                            ? colors.primary
-                            : colors.textMuted
-                        }
+                    <AppText variant="body" style={styles.content}>
+                      {item.content || '-'}
+                    </AppText>
+
+                    {imageUrl ? (
+                      <Image
+                        source={{ uri: imageUrl }}
+                        style={styles.postImage}
+                        resizeMode="cover"
                       />
-                      <AppText
-                        variant="muted"
-                        style={[
-                          styles.actionText,
-                          item.likes?.some((like) => like.username === myUsername) && styles.likedText,
-                        ]}
+                    ) : null}
+
+                    <View style={styles.actionRow}>
+                      <Pressable
+                        style={({ pressed }) => [styles.actionItem, pressed && styles.actionPressed]}
+                        onPress={(event) => handleCommentPress(event, item)}
                       >
-                        {item.likes?.length || 0}
-                      </AppText>
-                    </Pressable>
-                    <Pressable style={({ pressed }) => [styles.actionItem, pressed && styles.actionPressed]}>
-                      <Ionicons name="share-social-outline" size={16} color={colors.textMuted} />
-                    </Pressable>
+                        <Ionicons name="chatbubble-outline" size={16} color={colors.textMuted} />
+                        <AppText variant="muted" style={styles.actionText}>
+                          {item.comments?.length || 0}
+                        </AppText>
+                      </Pressable>
+                      <Pressable
+                        style={({ pressed }) => [styles.actionItem, pressed && styles.actionPressed]}
+                        onPress={(event) => handleLikePress(event, item._id)}
+                      >
+                        <Ionicons
+                          name={
+                            item.likes?.some((like) => like.username === myUsername)
+                              ? 'heart'
+                              : 'heart-outline'
+                          }
+                          size={16}
+                          color={
+                            item.likes?.some((like) => like.username === myUsername)
+                              ? colors.primary
+                              : colors.textMuted
+                          }
+                        />
+                        <AppText
+                          variant="muted"
+                          style={[
+                            styles.actionText,
+                            item.likes?.some((like) => like.username === myUsername) && styles.likedText,
+                          ]}
+                        >
+                          {item.likes?.length || 0}
+                        </AppText>
+                      </Pressable>
+                      <Pressable style={({ pressed }) => [styles.actionItem, pressed && styles.actionPressed]}>
+                        <Ionicons name="share-social-outline" size={16} color={colors.textMuted} />
+                      </Pressable>
+                    </View>
                   </View>
                 </View>
-              </View>
-            </Pressable>
-          )}
+              </Pressable>
+            );
+          }}
         />
 
         <Pressable style={styles.fab} onPress={() => navigation.navigate('CreatePostScreen')}>
@@ -246,6 +282,7 @@ const styles = StyleSheet.create({
     backgroundColor: '#1d9bf033',
     alignItems: 'center',
     justifyContent: 'center',
+    overflow: 'hidden',
   },
   avatarBtnText: {
     color: colors.primary,
@@ -319,6 +356,11 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     justifyContent: 'center',
     marginTop: 2,
+    overflow: 'hidden',
+  },
+  avatarImage: {
+    width: '100%',
+    height: '100%',
   },
   avatarText: {
     fontWeight: '700',
@@ -341,6 +383,15 @@ const styles = StyleSheet.create({
   },
   content: {
     lineHeight: 24,
+  },
+  postImage: {
+    width: '100%',
+    height: 220,
+    borderRadius: 18,
+    borderWidth: 1,
+    borderColor: colors.border,
+    backgroundColor: colors.bgSoft,
+    marginTop: 4,
   },
   actionRow: {
     flexDirection: 'row',

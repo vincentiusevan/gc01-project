@@ -47,6 +47,7 @@ const LIKE_POST = gql`
 export function PostDetailScreen({ route }) {
   const [comment, setComment] = useState('');
   const [myUsername, setMyUsername] = useState('');
+  const [profileImage, setProfileImage] = useState('');
   const postId = route.params?.post?._id || route.params?.postId;
 
   const { data, loading, error, refetch } = useQuery(GET_POST_BY_ID, {
@@ -74,7 +75,9 @@ export function PostDetailScreen({ route }) {
   useEffect(() => {
     const loadUsername = async () => {
       const username = (await SecureStore.getItemAsync('username')) || '';
+      const imageUrl = (await SecureStore.getItemAsync('profile_image_url')) || '';
       setMyUsername(username);
+      setProfileImage(imageUrl);
     };
 
     loadUsername();
@@ -134,6 +137,7 @@ export function PostDetailScreen({ route }) {
 
   const post = data?.getPostById;
   const isLiked = post?.likes?.some((like) => like.username === myUsername);
+  const isMyPost = post?.author?.username === myUsername && profileImage;
 
   return (
     <ScreenWrapper>
@@ -144,9 +148,25 @@ export function PostDetailScreen({ route }) {
         </AppText>
 
         <View style={styles.card}>
-          <AppText variant="body" style={styles.author}>
-            @{post?.author?.username || 'unknown'}
-          </AppText>
+          <View style={styles.authorRow}>
+            <View style={styles.avatar}>
+              {isMyPost ? (
+                <Image source={{ uri: profileImage }} style={styles.avatarImage} />
+              ) : (
+                <AppText variant="body" style={styles.avatarText}>
+                  {(post?.author?.name?.[0] || post?.author?.username?.[0] || '?').toUpperCase()}
+                </AppText>
+              )}
+            </View>
+            <View>
+              <AppText variant="body" style={styles.authorName}>
+                {post?.author?.name || 'Unknown'}
+              </AppText>
+              <AppText variant="body" style={styles.author}>
+                @{post?.author?.username || 'unknown'}
+              </AppText>
+            </View>
+          </View>
 
           <AppText variant="body" style={styles.content}>
             {post?.content || '-'}
@@ -244,10 +264,35 @@ const styles = StyleSheet.create({
     borderRadius: 18,
     padding: 16,
   },
+  authorRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 10,
+    marginBottom: 10,
+  },
+  avatar: {
+    width: 42,
+    height: 42,
+    borderRadius: 999,
+    backgroundColor: '#1d9bf033',
+    alignItems: 'center',
+    justifyContent: 'center',
+    overflow: 'hidden',
+  },
+  avatarImage: {
+    width: '100%',
+    height: '100%',
+  },
+  avatarText: {
+    fontWeight: '700',
+    color: colors.primary,
+  },
+  authorName: {
+    fontWeight: '700',
+  },
   author: {
     color: colors.primary,
     fontWeight: '700',
-    marginBottom: 8,
   },
   content: {
     lineHeight: 22,
