@@ -20,6 +20,7 @@
         "foregroundImage": "./assets/adaptive-icon.png",
         "backgroundColor": "#ffffff"
       },
+      "package": "com.vincentevan0504.ex",
       "edgeToEdgeEnabled": true
     },
     "web": {
@@ -33,6 +34,18 @@
           "photosPermission": "Allow EX to access your photos so you can attach images to posts."
         }
       ]
-    ]
+    ],
+    "extra": {
+      "eas": {
+        "projectId": "e876b067-be88-4189-b99b-b63ae54ef30b"
+      }
+    },
+    "owner": "vincentevan0504",
+    "runtimeVersion": {
+      "policy": "appVersion"
+    },
+    "updates": {
+      "url": "https://u.expo.dev/e876b067-be88-4189-b99b-b63ae54ef30b"
+    }
   }
 }
