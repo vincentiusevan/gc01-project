@@ -19,7 +19,6 @@ export const GET_POSTS = gql`
         _id
         username
         name
-        profileImage
       }
       comments {
         content
@@ -41,7 +40,6 @@ const LIKE_POST = gql`
 export function HomeScreen() {
   const navigation = useNavigation();
   const [myUsername, setMyUsername] = useState('');
-  const [profileImage, setProfileImage] = useState('');
   const { data, loading, error, refetch } = useQuery(GET_POSTS, {
     fetchPolicy: 'no-cache',
   });
@@ -50,9 +48,7 @@ export function HomeScreen() {
   useEffect(() => {
     const loadUsername = async () => {
       const username = (await SecureStore.getItemAsync('username')) || '';
-      const imageUrl = (await SecureStore.getItemAsync('profile_image_url')) || '';
       setMyUsername(username);
-      setProfileImage(imageUrl);
     };
 
     loadUsername();
@@ -60,9 +56,6 @@ export function HomeScreen() {
 
   useEffect(() => {
     const unsubscribe = navigation.addListener('focus', () => {
-      SecureStore.getItemAsync('profile_image_url').then((imageUrl) => {
-        setProfileImage(imageUrl || '');
-      });
       refetch();
     });
 
@@ -136,13 +129,9 @@ export function HomeScreen() {
           ListHeaderComponent={
             <View style={styles.header}>
               <Pressable style={styles.avatarBtn} onPress={() => navigation.navigate('ProfileScreen')}>
-                {profileImage ? (
-                  <Image source={{ uri: profileImage }} style={styles.avatarImage} />
-                ) : (
-                  <AppText variant="body" style={styles.avatarBtnText}>
-                    P
-                  </AppText>
-                )}
+                <AppText variant="body" style={styles.avatarBtnText}>
+                  P
+                </AppText>
               </Pressable>
               <View style={styles.headerCenter}>
                 <AppText variant="title" style={styles.title}>
@@ -166,20 +155,14 @@ export function HomeScreen() {
           }
           renderItem={({ item }) => {
             const imageUrl = typeof item.imgUrl === 'string' ? item.imgUrl.trim() : '';
-            const authorProfileImage =
-              item.author?.profileImage || (item.author?.username === myUsername ? profileImage : '');
 
             return (
               <Pressable style={styles.card} onPress={() => handleOpenPostDetail(item)}>
                 <View style={styles.rowTop}>
                   <Pressable style={styles.avatar} onPress={() => handleOpenUserDetail(item.author)}>
-                    {authorProfileImage ? (
-                      <Image source={{ uri: authorProfileImage }} style={styles.avatarImage} />
-                    ) : (
-                      <AppText variant="body" style={styles.avatarText}>
-                        {(item.author?.name?.[0] || item.author?.username?.[0] || '?').toUpperCase()}
-                      </AppText>
-                    )}
+                    <AppText variant="body" style={styles.avatarText}>
+                      {(item.author?.name?.[0] || item.author?.username?.[0] || '?').toUpperCase()}
+                    </AppText>
                   </Pressable>
 
                   <View style={styles.contentWrap}>
@@ -284,7 +267,6 @@ const styles = StyleSheet.create({
     backgroundColor: '#1d9bf033',
     alignItems: 'center',
     justifyContent: 'center',
-    overflow: 'hidden',
   },
   avatarBtnText: {
     color: colors.primary,
@@ -358,11 +340,6 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     justifyContent: 'center',
     marginTop: 2,
-    overflow: 'hidden',
-  },
-  avatarImage: {
-    width: '100%',
-    height: '100%',
   },
   avatarText: {
     fontWeight: '700',

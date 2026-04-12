@@ -1,4 +1,4 @@
-import { View, StyleSheet, Alert, Image } from 'react-native';
+import { View, StyleSheet, Alert } from 'react-native';
 import { gql } from '@apollo/client';
 import { useMutation, useQuery } from '@apollo/client/react';
 import { ScreenWrapper } from '../components/ScreenWrapper';
@@ -13,7 +13,6 @@ const GET_USER_BY_ID = gql`
       name
       username
       email
-      profileImage
       followers {
         _id
         name
@@ -92,7 +91,6 @@ export function UserDetailScreen({ route, navigation }) {
   const user = data?.getUserById;
   const username = user?.username || 'unknown-user';
   const name = user?.name || 'Unknown User';
-  const profileImage = user?.profileImage;
   const followers = user?.followers || [];
   const followings = user?.followings || [];
 
@@ -105,11 +103,7 @@ export function UserDetailScreen({ route, navigation }) {
 
         <View style={styles.card}>
           <View style={styles.avatar}>
-            {profileImage ? (
-              <Image source={{ uri: profileImage }} style={styles.avatarImage} />
-            ) : (
-              <AppText variant="heading">{name[0]}</AppText>
-            )}
+            <AppText variant="heading">{name[0]}</AppText>
           </View>
 
           <AppText variant="heading">{name}</AppText>
@@ -161,11 +155,6 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     justifyContent: 'center',
     marginBottom: 6,
-    overflow: 'hidden',
-  },
-  avatarImage: {
-    width: '100%',
-    height: '100%',
   },
   listCard: {
     backgroundColor: colors.card,

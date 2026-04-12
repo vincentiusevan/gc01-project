@@ -20,7 +20,6 @@ type PostAuthor {
   name: String
   username: String
   email: String
-  profileImage: String
 }
 
 

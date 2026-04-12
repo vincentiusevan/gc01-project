@@ -3,7 +3,6 @@ import { getDB } from '../config/mongodb.js';
 import { hashPassword, comparePassword } from '../helpers/bcrypt.js';
 import emailValidator from 'email-validator';
 import { signToken } from '../helpers/jwt.js';
-import { redis } from '../config/redis.js';
 
 export default class User {
   static getCollection() {
@@ -32,13 +31,8 @@ export default class User {
     const existingEmail = await collection.findOne({ email: payload.email });
     if (existingEmail) throw new Error('Email already registered');
 
-    const newUser = {
-      ...payload,
-      password: hashPassword(payload.password),
-      profileImage: '',
-    };
-
-    await collection.insertOne(newUser);
+    payload.password = hashPassword(payload.password);
+    await collection.insertOne(payload);
 
     return 'Register berhasil';
   }
@@ -135,24 +129,4 @@ export default class User {
     return users;
   }
 
-  static async updateProfileImage(id, profileImage) {
-    const collection = this.getCollection();
-    const _id = new ObjectId(id);
-
-    if (!profileImage) throw new Error('Profile image is required');
-
-    await collection.updateOne(
-      { _id },
-      {
-        $set: {
-          profileImage,
-          updatedAt: new Date(),
-        },
-      },
-    );
-
-    await redis.del('posts:all:v2');
-
-    return 'Profile image updated';
-  }
 }

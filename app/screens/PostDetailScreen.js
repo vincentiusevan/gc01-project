@@ -20,7 +20,6 @@ const GET_POST_BY_ID = gql`
       author {
         username
         name
-        profileImage
       }
       comments {
         content
@@ -48,7 +47,6 @@ const LIKE_POST = gql`
 export function PostDetailScreen({ route }) {
   const [comment, setComment] = useState('');
   const [myUsername, setMyUsername] = useState('');
-  const [profileImage, setProfileImage] = useState('');
   const postId = route.params?.post?._id || route.params?.postId;
 
   const { data, loading, error, refetch } = useQuery(GET_POST_BY_ID, {
@@ -76,9 +74,7 @@ export function PostDetailScreen({ route }) {
   useEffect(() => {
     const loadUsername = async () => {
       const username = (await SecureStore.getItemAsync('username')) || '';
-      const imageUrl = (await SecureStore.getItemAsync('profile_image_url')) || '';
       setMyUsername(username);
-      setProfileImage(imageUrl);
     };
 
     loadUsername();
@@ -138,8 +134,6 @@ export function PostDetailScreen({ route }) {
 
   const post = data?.getPostById;
   const isLiked = post?.likes?.some((like) => like.username === myUsername);
-  const authorProfileImage =
-    post?.author?.profileImage || (post?.author?.username === myUsername ? profileImage : '');
 
   return (
     <ScreenWrapper>
@@ -152,13 +146,9 @@ export function PostDetailScreen({ route }) {
         <View style={styles.card}>
           <View style={styles.authorRow}>
             <View style={styles.avatar}>
-              {authorProfileImage ? (
-                <Image source={{ uri: authorProfileImage }} style={styles.avatarImage} />
-              ) : (
-                <AppText variant="body" style={styles.avatarText}>
-                  {(post?.author?.name?.[0] || post?.author?.username?.[0] || '?').toUpperCase()}
-                </AppText>
-              )}
+              <AppText variant="body" style={styles.avatarText}>
+                {(post?.author?.name?.[0] || post?.author?.username?.[0] || '?').toUpperCase()}
+              </AppText>
             </View>
             <View>
               <AppText variant="body" style={styles.authorName}>
@@ -279,11 +269,6 @@ const styles = StyleSheet.create({
     backgroundColor: '#1d9bf033',
     alignItems: 'center',
     justifyContent: 'center',
-    overflow: 'hidden',
-  },
-  avatarImage: {
-    width: '100%',
-    height: '100%',
   },
   avatarText: {
     fontWeight: '700',
