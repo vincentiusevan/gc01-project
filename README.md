@@ -1,27 +1,33 @@
-[![Open in Visual Studio Code](https://classroom.github.com/assets/open-in-vscode-2e0aaae1b6195c2367325f4f02e2d04e9abb55f0b24a779b69b11b9e10269abc.svg)](https://classroom.github.com/online_ide?assignment_repo_id=23433816&assignment_repo_type=AssignmentRepo)
+# EX
 
-# GC01
+A mobile social media app. You can register, post with an image and tags, comment, like, search for people, and follow them.
 
-## My Social Media App
+- **App:** React Native with Expo, Apollo Client, React Navigation
+- **Server:** Apollo Server (GraphQL), MongoDB, Redis, JWT
 
-My Social Media App adalah sebuah aplikasi client(mobile)-server. Challenge ini juga merupakan salah satu aplikasi mobile pertama dan terakhir kamu, jadi kerjakan dengan baik sebagai bekal portofolio kamu. Pada challenge ini, kamu diminta untuk membuat aplikasi client(mobile)-server dengan detail sebagai berikut:
+The list of posts is cached in Redis. The cache is cleared when a post, comment, or like changes it. Images are uploaded to Cloudinary from the app.
 
-### Struktur Folder
+## Running it
 
-- [ ] server: untuk menyimpan aplikasi server GraphQL kamu
-- [ ] app: untuk menyimpan aplikasi mobile React Native kamu
+You need Node.js, a MongoDB database, and a Redis server.
 
-### Fitur
+Server:
 
-- [ ] Fitur Register
-- [ ] Fitur Login
-- [ ] FItur Add Post
-- [ ] Fitur Show Post (berdasarkan yang paling baru)
-- [ ] Fitur Comment Post (Embedded Document)
-- [ ] Fitur search user berdasarkan nama atau username
-- [ ] Fitur follow
-- [ ] Menampilkan Followers dan Following dari setiap user (Reference with $lookup)
-- [ ] Fitur Like Post
-- [ ] Menampilkan total like dari setiap post
+```bash
+cd server
+npm install
+cp .env-example .env
+node index.js
+```
 
-https://expo.dev/artifacts/eas/wae1r41m1K6pKNKYHxUYiJ.apk
+Fill in `.env` first: `MONGODB_URI`, `MONGODB_DBNAME`, `JWT_SECRET`, `REDIS_URI`, and `PORT`. `PORT` has no default.
+
+App:
+
+```bash
+cd app
+npm install
+npm start
+```
+
+The app talks to the deployed server. To use your local one, change `uri` in `app/config/apollo.js`.
